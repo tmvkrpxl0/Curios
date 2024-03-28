@@ -247,4 +247,11 @@ public class CuriosImplMixinHooks {
         new SPacketBreak(slotContext.entity().getId(), slotContext.identifier(),
             slotContext.index()));
   }
+
+  private static final Map<String, UUID> UUIDS = new HashMap<>();
+
+  public static UUID getUuid(SlotContext slotContext) {
+    String key = slotContext.identifier() + slotContext.index();
+    return UUIDS.computeIfAbsent(key, (k) -> UUID.nameUUIDFromBytes(k.getBytes()));
+  }
 }

@@ -569,7 +569,7 @@ public class CurioStacksHandler implements ICurioStacksHandler {
       SlotContext slotContext = new SlotContext(identifier, entity, i, false, this.visible);
 
       if (!stack.isEmpty()) {
-        UUID uuid = UUID.nameUUIDFromBytes((identifier + i).getBytes());
+        UUID uuid = CuriosApi.getUuid(slotContext);
         Multimap<Attribute, AttributeModifier> map =
             CuriosApi.getAttributeModifiers(slotContext, uuid, stack);
         Multimap<String, AttributeModifier> slots = HashMultimap.create();

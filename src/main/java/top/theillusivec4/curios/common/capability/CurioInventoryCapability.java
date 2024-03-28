@@ -544,7 +544,7 @@ public class CurioInventoryCapability {
             if (!stack.isEmpty()) {
               SlotContext slotContext = new SlotContext(id, this.getWearer(), i, false,
                   renderStates.size() > i && renderStates.get(i));
-              UUID uuid = UUID.nameUUIDFromBytes((id + i).getBytes());
+              UUID uuid = CuriosApi.getUuid(slotContext);
               Multimap<Attribute, AttributeModifier> map =
                   CuriosApi.getAttributeModifiers(slotContext, uuid, stack);
 
