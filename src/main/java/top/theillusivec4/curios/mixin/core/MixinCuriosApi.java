@@ -135,8 +135,8 @@ public class MixinCuriosApi {
     ci.cancel();
   }
 
-  @Inject(at = @At("HEAD"), method = "getUuid", cancellable = true)
-  private static void curios$getUuid(SlotContext slotContext, CallbackInfoReturnable<UUID> ci) {
+  @Inject(at = @At("HEAD"), method = "getSlotUuid", cancellable = true)
+  private static void curios$getSlotUuid(SlotContext slotContext, CallbackInfoReturnable<UUID> ci) {
     ci.setReturnValue(CuriosImplMixinHooks.getUuid(slotContext));
   }
 

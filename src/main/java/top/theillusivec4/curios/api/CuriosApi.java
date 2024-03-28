@@ -284,7 +284,7 @@ public final class CuriosApi {
    * @param slotContext The SlotContext to base the UUID on
    * @return The UUID based on the SlotContext
    */
-  public static UUID getUuid(SlotContext slotContext) {
+  public static UUID getSlotUuid(SlotContext slotContext) {
     apiError();
     return UUID.randomUUID();
   }

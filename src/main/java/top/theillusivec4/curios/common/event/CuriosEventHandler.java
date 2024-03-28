@@ -581,7 +581,7 @@ public class CuriosEventHandler {
                   renderStates.size() > index && renderStates.get(index), HandlerType.EQUIPMENT);
               MinecraftForge.EVENT_BUS
                   .post(new CurioChangeEvent(livingEntity, identifier, i, prevStack, stack));
-              UUID uuid = CuriosApi.getUuid(slotContext);
+              UUID uuid = CuriosApi.getSlotUuid(slotContext);
 
               if (!prevStack.isEmpty()) {
                 Multimap<Attribute, AttributeModifier> map =

@@ -65,7 +65,7 @@ public class CPacketDestroy {
                 NonNullList<Boolean> renderStates = stacksHandler.getRenders();
                 SlotContext slotContext = new SlotContext(id, sender, i, false,
                     renderStates.size() > i && renderStates.get(i));
-                UUID uuid = CuriosApi.getUuid(slotContext);
+                UUID uuid = CuriosApi.getSlotUuid(slotContext);
                 ItemStack stack = stackHandler.getStackInSlot(i);
                 Multimap<Attribute, AttributeModifier> map =
                     CuriosApi.getAttributeModifiers(slotContext, uuid, stack);
