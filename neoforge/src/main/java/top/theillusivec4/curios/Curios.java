@@ -99,6 +99,7 @@ public class Curios {
     NeoForge.EVENT_BUS.addListener(this::registerCommands);
     NeoForge.EVENT_BUS.addListener(this::reload);
     ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, CuriosClientConfig.CLIENT_SPEC);
+    ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CuriosConfig.COMMON_SPEC);
     ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, CuriosConfig.SERVER_SPEC);
   }
 

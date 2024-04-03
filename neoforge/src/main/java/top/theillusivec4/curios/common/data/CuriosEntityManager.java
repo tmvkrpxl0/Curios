@@ -132,7 +132,14 @@ public class CuriosEntityManager extends SimpleJsonResourceReloadListener {
         CuriosConstants.LOG.error("Parsing error loading curio entity {}", resourcelocation, e);
       }
     }
+    Map<String, ISlotType> configSlots = new HashMap<>();
 
+    for (String configSlot : CuriosSlotManager.INSTANCE.getConfigSlots()) {
+      CuriosSlotManager.INSTANCE.getSlot(configSlot)
+          .ifPresentOrElse(slot -> configSlots.put(configSlot, slot),
+              () -> CuriosConstants.LOG.error("{} is not a registered slot type!", configSlot));
+    }
+    map.computeIfAbsent(EntityType.PLAYER, (k) -> ImmutableMap.builder()).putAll(configSlots);
     this.server = map.entrySet().stream().collect(
         ImmutableMap.toImmutableMap(Map.Entry::getKey,
             (entry) -> entry.getValue().buildKeepingLast()));
