@@ -76,7 +76,7 @@ public class SPacketSetIcons {
           icons.put(entry.getKey(), entry.getValue());
           slotIds.add(entry.getKey());
         }
-        CuriosSlotManager.INSTANCE.setIcons(icons);
+        CuriosSlotManager.CLIENT.setIcons(icons);
       }
       CurioArgumentType.slotIds = slotIds;
     });

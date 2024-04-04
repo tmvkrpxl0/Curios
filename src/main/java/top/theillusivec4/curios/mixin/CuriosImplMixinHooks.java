@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -37,7 +38,6 @@ import top.theillusivec4.curios.common.data.CuriosEntityManager;
 import top.theillusivec4.curios.common.data.CuriosSlotManager;
 import top.theillusivec4.curios.common.network.NetworkHandler;
 import top.theillusivec4.curios.common.network.server.SPacketBreak;
-import top.theillusivec4.curios.common.slottype.SlotType;
 
 public class CuriosImplMixinHooks {
 
@@ -51,68 +51,47 @@ public class CuriosImplMixinHooks {
     return Optional.ofNullable(REGISTRY.get(item));
   }
 
-  public static Optional<ISlotType> getSlot(String id) {
-    return Optional.ofNullable(CuriosApi.getSlots().get(id));
+  public static Map<String, ISlotType> getSlots(boolean isClient) {
+    CuriosSlotManager slotManager = isClient ? CuriosSlotManager.CLIENT : CuriosSlotManager.SERVER;
+    return slotManager.getSlots();
   }
 
-  public static ResourceLocation getSlotIcon(String id) {
-    return CuriosSlotManager.INSTANCE.getIcon(id);
+  public static Map<String, ISlotType> getEntitySlots(EntityType<?> type, boolean isClient) {
+    CuriosEntityManager entityManager =
+        isClient ? CuriosEntityManager.CLIENT : CuriosEntityManager.SERVER;
+    return entityManager.getEntitySlots(type);
   }
 
-  public static Map<String, ISlotType> getSlots() {
-    return CuriosSlotManager.INSTANCE.getSlots();
-  }
-
-  public static Map<String, ISlotType> getPlayerSlots() {
-    return CuriosApi.getEntitySlots(EntityType.PLAYER);
-  }
-
-  public static Map<String, ISlotType> getEntitySlots(EntityType<?> type) {
-    return CuriosEntityManager.INSTANCE.getEntitySlots(type);
-  }
-
-  public static Map<String, ISlotType> getItemStackSlots(ItemStack stack) {
-    ITagManager<Item> tags = ForgeRegistries.ITEMS.tags();
-    Map<String, ISlotType> result = new HashMap<>();
-
-    if (tags != null) {
-      Set<String> ids = stack.getTags()
-          .filter(tagKey -> tagKey.location().getNamespace().equals(CuriosApi.MODID))
-          .map(tagKey -> tagKey.location().getPath()).collect(Collectors.toSet());
-      Map<String, ISlotType> allSlots = CuriosSlotManager.INSTANCE.getSlots();
-
-      for (String id : ids) {
-        ISlotType slotType = allSlots.get(id);
-
-        if (slotType != null) {
-          result.put(id, slotType);
-        } else {
-          result.put(id, new SlotType.Builder(id).build());
-        }
-      }
-    }
-    return result;
+  public static Map<String, ISlotType> getItemStackSlots(ItemStack stack, boolean isClient) {
+    return taggedSlots(stack, CuriosApi.getSlots(isClient));
   }
 
   public static Map<String, ISlotType> getItemStackSlots(ItemStack stack,
                                                          LivingEntity livingEntity) {
+    return taggedSlots(stack, CuriosApi.getEntitySlots(livingEntity));
+  }
+
+  private static Map<String, ISlotType> taggedSlots(ItemStack stack, Map<String, ISlotType> map) {
     ITagManager<Item> tags = ForgeRegistries.ITEMS.tags();
-    Map<String, ISlotType> result = new HashMap<>();
 
     if (tags != null) {
       Set<String> ids = stack.getTags()
           .filter(tagKey -> tagKey.location().getNamespace().equals(CuriosApi.MODID))
           .map(tagKey -> tagKey.location().getPath()).collect(Collectors.toSet());
-      Map<String, ISlotType> entitySlots = getEntitySlots(livingEntity.getType());
+      return filteredSlots(slotType -> ids.contains(slotType.getIdentifier()), map);
+    }
+    return Map.of();
+  }
 
-      for (String id : ids) {
-        ISlotType slotType = entitySlots.get(id);
+  private static Map<String, ISlotType> filteredSlots(Predicate<ISlotType> filter,
+                                                      Map<String, ISlotType> map) {
+    Map<String, ISlotType> result = new HashMap<>();
 
-        if (slotType != null) {
-          result.put(id, slotType);
-        } else {
-          result.put(id, new SlotType.Builder(id).build());
-        }
+    for (Map.Entry<String, ISlotType> entry : map.entrySet()) {
+      ISlotType slotType = entry.getValue();
+
+      if (filter.test(slotType)) {
+        result.put(entry.getKey(), slotType);
       }
     }
     return result;
@@ -133,7 +112,7 @@ public class CuriosImplMixinHooks {
 
   public static boolean isStackValid(SlotContext slotContext, ItemStack stack) {
     String id = slotContext.identifier();
-    Set<String> slots = getItemStackSlots(stack).keySet();
+    Set<String> slots = getItemStackSlots(stack, slotContext.entity()).keySet();
     return (!slots.isEmpty() && id.equals("curio")) || slots.contains(id) ||
         slots.contains("curio");
   }
@@ -167,8 +146,10 @@ public class CuriosImplMixinHooks {
 
               if (rl.getNamespace().equals("curios")) {
                 String identifier1 = rl.getPath();
+                LivingEntity livingEntity = slotContext.entity();
+                boolean clientSide = livingEntity == null || livingEntity.level().isClientSide();
 
-                if (CuriosApi.getSlot(identifier1).isPresent()) {
+                if (CuriosApi.getSlot(identifier1, clientSide).isPresent()) {
                   CuriosApi.addSlotModifier(multimap, identifier1, id, amount, operation);
                 }
               } else {

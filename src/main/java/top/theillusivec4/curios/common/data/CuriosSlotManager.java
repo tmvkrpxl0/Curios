@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -34,7 +37,8 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
 
   private static final Gson GSON =
       (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
-  public static CuriosSlotManager INSTANCE = new CuriosSlotManager();
+  public static CuriosSlotManager SERVER = new CuriosSlotManager();
+  public static CuriosSlotManager CLIENT = new CuriosSlotManager();
   private Map<String, ISlotType> slots = ImmutableMap.of();
   private Map<String, ResourceLocation> icons = ImmutableMap.of();
   private Map<String, Set<String>> idToMods = ImmutableMap.of();
@@ -149,6 +153,28 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
 
   public Optional<ISlotType> getSlot(String id) {
     return Optional.ofNullable(this.slots.get(id));
+  }
+
+  public static ListTag getSyncPacket() {
+    ListTag tag = new ListTag();
+
+    for (Map.Entry<String, ISlotType> entry : SERVER.slots.entrySet()) {
+      tag.add(entry.getValue().writeNbt());
+    }
+    return tag;
+  }
+
+  public static void applySyncPacket(ListTag tag) {
+    ImmutableMap.Builder<String, ISlotType> map = ImmutableMap.builder();
+
+    for (Tag tag1 : tag) {
+
+      if (tag1 instanceof CompoundTag slotType) {
+        ISlotType type = SlotType.from(slotType);
+        map.put(type.getIdentifier(), type);
+      }
+    }
+    CLIENT.slots = map.build();
   }
 
   public void setIcons(Map<String, ResourceLocation> icons) {

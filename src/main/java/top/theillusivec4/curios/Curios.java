@@ -125,7 +125,7 @@ public class Curios {
     CuriosApi.setSlotHelper(new SlotHelper());
     Set<String> slotIds = new HashSet<>();
 
-    for (ISlotType value : CuriosSlotManager.INSTANCE.getSlots().values()) {
+    for (ISlotType value : CuriosSlotManager.SERVER.getSlots().values()) {
       CuriosApi.getSlotHelper().addSlotType(value);
       slotIds.add(value.getIdentifier());
     }
@@ -142,10 +142,10 @@ public class Curios {
 
   private void reload(final AddReloadListenerEvent evt) {
     ICondition.IContext ctx = evt.getConditionContext();
-    CuriosSlotManager.INSTANCE = new CuriosSlotManager(ctx);
-    evt.addListener(CuriosSlotManager.INSTANCE);
-    CuriosEntityManager.INSTANCE = new CuriosEntityManager(ctx);
-    evt.addListener(CuriosEntityManager.INSTANCE);
+    CuriosSlotManager.SERVER = new CuriosSlotManager(ctx);
+    evt.addListener(CuriosSlotManager.SERVER);
+    CuriosEntityManager.SERVER = new CuriosEntityManager(ctx);
+    evt.addListener(CuriosEntityManager.SERVER);
     evt.addListener(new SimplePreparableReloadListener<Void>() {
       @Nonnull
       @Override

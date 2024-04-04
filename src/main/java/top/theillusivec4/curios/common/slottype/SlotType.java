@@ -20,6 +20,7 @@
 package top.theillusivec4.curios.common.slottype;
 
 import java.util.Objects;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.EnumUtils;
 import top.theillusivec4.curios.Curios;
@@ -37,6 +38,18 @@ public final class SlotType implements ISlotType {
   private final ResourceLocation icon;
   private final ICurio.DropRule dropRule;
   private final boolean renderToggle;
+
+  public static ISlotType from(CompoundTag tag) {
+    SlotType.Builder builder = new Builder(tag.getString("Identifier"));
+    builder.icon(new ResourceLocation(tag.getString("Icon")));
+    builder.order(tag.getInt("Order"));
+    builder.size(tag.getInt("Size"));
+    builder.useNativeGui(tag.getBoolean("UseNativeGui"));
+    builder.hasCosmetic(tag.getBoolean("HasCosmetic"));
+    builder.renderToggle(tag.getBoolean("ToggleRender"));
+    builder.dropRule(ICurio.DropRule.values()[tag.getInt("DropRule")]);
+    return builder.build();
+  }
 
   private SlotType(Builder builder) {
     this.identifier = builder.identifier;
@@ -116,6 +129,20 @@ public final class SlotType implements ISlotType {
     } else {
       return -1;
     }
+  }
+
+  @Override
+  public CompoundTag writeNbt() {
+    CompoundTag tag = new CompoundTag();
+    tag.putString("Identifier", this.identifier);
+    tag.putString("Icon", this.icon.toString());
+    tag.putInt("Order", this.order);
+    tag.putInt("Size", this.size);
+    tag.putBoolean("UseNativeGui", this.useNativeGui);
+    tag.putBoolean("HasCosmetic", this.hasCosmetic);
+    tag.putBoolean("ToggleRender", this.renderToggle);
+    tag.putInt("DropRule", this.dropRule.ordinal());
+    return tag;
   }
 
   public static class Builder {

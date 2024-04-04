@@ -28,6 +28,7 @@ import java.util.UUID;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -52,7 +53,7 @@ public interface ISlotHelper {
   void clear();
 
   /**
-   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getSlot(String)}
+   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getSlot(String, Level)}
    */
   @Deprecated(forRemoval = true, since = "1.20.1")
   @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
@@ -66,7 +67,7 @@ public interface ISlotHelper {
   Collection<ISlotType> getSlotTypes();
 
   /**
-   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getEntitySlots(EntityType)}
+   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getEntitySlots(LivingEntity)}
    */
   @Deprecated(forRemoval = true, since = "1.20.1")
   @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
@@ -95,7 +96,7 @@ public interface ISlotHelper {
   void setSlotsForType(String id, LivingEntity livingEntity, int amount);
 
   /**
-   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getEntitySlots(EntityType)}
+   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getEntitySlots(LivingEntity)}
    */
   @Deprecated(forRemoval = true)
   @ApiStatus.ScheduledForRemoval(inVersion = "1.21")

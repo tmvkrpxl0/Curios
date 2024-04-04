@@ -18,7 +18,6 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
@@ -28,14 +27,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraftforge.registries.ForgeRegistries;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotAttribute;
-import top.theillusivec4.curios.common.CuriosHelper;
 
 public class SetCurioAttributesFunction extends LootItemConditionalFunction {
 
@@ -147,7 +144,7 @@ public class SetCurioAttributesFunction extends LootItemConditionalFunction {
       if (resourcelocation.getNamespace().equals("curios")) {
         String identifier = resourcelocation.getPath();
 
-        if (CuriosApi.getSlot(identifier).isEmpty()) {
+        if (CuriosApi.getSlot(identifier, false).isEmpty()) {
           throw new JsonSyntaxException("Unknown curios slot type: " + identifier);
         }
         attribute = SlotAttribute.getOrCreate(identifier);

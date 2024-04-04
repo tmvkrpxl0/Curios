@@ -136,7 +136,7 @@ public class CuriosEventHandler {
                     evt.isRecentlyHit())).orElse(DropRule.DEFAULT);
 
         if (dropRule == DropRule.DEFAULT) {
-          dropRule = CuriosSlotManager.INSTANCE.getSlot(identifier).map(ISlotType::getDropRule)
+          dropRule = CuriosApi.getSlot(identifier, livingEntity.level()).map(ISlotType::getDropRule)
               .orElse(DropRule.DEFAULT);
         }
 
@@ -194,7 +194,7 @@ public class CuriosEventHandler {
     Player playerEntity = evt.getEntity();
 
     if (playerEntity instanceof ServerPlayer) {
-      Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots().values();
+      Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots(playerEntity).values();
       Map<String, ResourceLocation> icons = new HashMap<>();
       slotTypes.forEach(type -> icons.put(type.getIdentifier(), type.getIcon()));
       NetworkHandler.INSTANCE
@@ -211,7 +211,8 @@ public class CuriosEventHandler {
 
       for (ServerPlayer player : playerList.getPlayers()) {
         NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
-            new SPacketSyncData(CuriosEntityManager.getSyncPacket()));
+            new SPacketSyncData(CuriosSlotManager.getSyncPacket(),
+                CuriosEntityManager.getSyncPacket()));
         CuriosApi.getCuriosInventory(player).ifPresent(handler -> {
           handler.readTag(handler.writeTag());
           NetworkHandler.INSTANCE.send(
@@ -222,7 +223,7 @@ public class CuriosEventHandler {
             curiosContainer.resetSlots();
           }
         });
-        Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots().values();
+        Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots(player).values();
         Map<String, ResourceLocation> icons = new HashMap<>();
         slotTypes.forEach(type -> icons.put(type.getIdentifier(), type.getIcon()));
         NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player),
@@ -231,11 +232,12 @@ public class CuriosEventHandler {
     } else {
       ServerPlayer mp = evt.getPlayer();
       NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> mp),
-          new SPacketSyncData(CuriosEntityManager.getSyncPacket()));
+          new SPacketSyncData(CuriosSlotManager.getSyncPacket(),
+              CuriosEntityManager.getSyncPacket()));
       CuriosApi.getCuriosInventory(mp).ifPresent(
           handler -> NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> mp),
               new SPacketSyncCurios(mp.getId(), handler.getCurios())));
-      Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots().values();
+      Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots(mp).values();
       Map<String, ResourceLocation> icons = new HashMap<>();
       slotTypes.forEach(type -> icons.put(type.getIdentifier(), type.getIcon()));
       NetworkHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> mp),

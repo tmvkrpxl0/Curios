@@ -19,6 +19,7 @@
 
 package top.theillusivec4.curios.api.type;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import top.theillusivec4.curios.api.type.capability.ICurio;
@@ -64,6 +65,10 @@ public interface ISlotType extends Comparable<ISlotType> {
    * @return The {@link ICurio.DropRule} associated with this slot type
    */
   ICurio.DropRule getDropRule();
+
+  default CompoundTag writeNbt() {
+    return new CompoundTag();
+  }
 
   /**
    * @deprecated Check if {@link ISlotType#getSize()} returns 0
