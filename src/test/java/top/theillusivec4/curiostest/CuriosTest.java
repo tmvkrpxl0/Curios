@@ -22,9 +22,11 @@ package top.theillusivec4.curiostest;
 import java.util.Collection;
 import java.util.List;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -39,6 +41,7 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotAttribute;
 import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.client.CuriosRendererRegistry;
@@ -69,6 +72,8 @@ public class CuriosTest {
     eventBus.addListener(this::creativeTab);
     eventBus.addListener(this::gatherData);
     MinecraftForge.EVENT_BUS.addListener(this::attributeModifier);
+    CuriosApi.registerCurioPredicate(new ResourceLocation(MODID, "test"),
+        slotResult -> slotResult.stack().getItem() == Items.OAK_BOAT);
   }
 
   private void gatherData(final GatherDataEvent evt) {

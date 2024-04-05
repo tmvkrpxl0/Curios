@@ -28,5 +28,7 @@ public interface ISlotData {
 
   ISlotData addCondition(ICondition condition);
 
+  ISlotData addValidator(ResourceLocation resourceLocation);
+
   JsonObject serialize();
 }

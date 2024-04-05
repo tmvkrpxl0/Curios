@@ -9,6 +9,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -222,6 +223,8 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
     Boolean jsonNative =
         jsonObject.has("use_native_gui") ? GsonHelper.getAsBoolean(jsonObject, "use_native_gui") :
             null;
+    JsonArray jsonSlotResultPredicate = jsonObject.has("validators") ?
+        GsonHelper.getAsJsonArray(jsonObject, "validators") : null;
 
     if (jsonOrder != null) {
       builder.order(jsonOrder, replace);
@@ -249,6 +252,15 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
 
     if (jsonToggle != null) {
       builder.renderToggle(jsonToggle, replace);
+    }
+
+    if (jsonSlotResultPredicate != null) {
+      Set<ResourceLocation> result = new HashSet<>();
+
+      for (JsonElement jsonElement : jsonSlotResultPredicate) {
+        result.add(new ResourceLocation(jsonElement.getAsString()));
+      }
+      builder.validators(result);
     }
   }
 }
