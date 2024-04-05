@@ -39,6 +39,9 @@ public class CuriosConfig {
   public static class Server {
 
     public ForgeConfigSpec.EnumValue<KeepCurios> keepCurios;
+    public ForgeConfigSpec.BooleanValue enableExperimentalMenu;
+    public ForgeConfigSpec.IntValue minimumColumns;
+    public ForgeConfigSpec.IntValue maxSlotsPerPage;
 
     public Server(ForgeConfigSpec.Builder builder) {
       keepCurios = builder.comment("""
@@ -48,6 +51,24 @@ public class CuriosConfig {
               OFF - Curios items are dropped on death""")
           .translation(CONFIG_PREFIX + "keepCurios").defineEnum("keepCurios", KeepCurios.DEFAULT);
 
+      builder.push("menu");
+
+      enableExperimentalMenu =
+          builder.comment("Enables the experimental new Curios menu that replaces the default one.")
+              .translation(CONFIG_PREFIX + "enableExperimentalMenu")
+              .define("enableExperimentalMenu", false);
+
+      builder.push("experimental");
+
+      minimumColumns = builder.comment("The minimum number of columns for the Curios menu.")
+          .translation(CONFIG_PREFIX + "minimumColumns").defineInRange("minimumColumns", 1, 1, 8);
+
+      maxSlotsPerPage = builder.comment("The maximum number of slots per page of the Curios menu.")
+          .translation(CONFIG_PREFIX + "maxSlotsPerPage")
+          .defineInRange("maxSlotsPerPage", 64, 1, 64);
+
+      builder.pop();
+      builder.pop();
       builder.build();
     }
   }

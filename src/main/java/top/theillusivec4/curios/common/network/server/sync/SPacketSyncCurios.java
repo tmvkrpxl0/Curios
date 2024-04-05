@@ -32,6 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 import top.theillusivec4.curios.Curios;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.common.inventory.CurioStacksHandler;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
@@ -102,7 +103,7 @@ public class SPacketSyncCurios {
                 handler.setCurios(stacks);
 
                 if (entity instanceof LocalPlayer player &&
-                    player.containerMenu instanceof CuriosContainer curiosContainer) {
+                    player.containerMenu instanceof ICuriosMenu curiosContainer) {
                   curiosContainer.resetSlots();
                 }
               });

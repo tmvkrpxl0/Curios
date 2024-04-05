@@ -31,10 +31,13 @@ import top.theillusivec4.curios.Curios;
 import top.theillusivec4.curios.common.network.client.CPacketDestroy;
 import top.theillusivec4.curios.common.network.client.CPacketOpenCurios;
 import top.theillusivec4.curios.common.network.client.CPacketOpenVanilla;
+import top.theillusivec4.curios.common.network.client.CPacketPage;
 import top.theillusivec4.curios.common.network.client.CPacketScroll;
+import top.theillusivec4.curios.common.network.client.CPacketToggleCosmetics;
 import top.theillusivec4.curios.common.network.client.CPacketToggleRender;
 import top.theillusivec4.curios.common.network.server.SPacketBreak;
 import top.theillusivec4.curios.common.network.server.SPacketGrabbedItem;
+import top.theillusivec4.curios.common.network.server.SPacketPage;
 import top.theillusivec4.curios.common.network.server.SPacketScroll;
 import top.theillusivec4.curios.common.network.server.SPacketSetIcons;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios;
@@ -68,6 +71,9 @@ public class NetworkHandler {
         CPacketDestroy::handle);
     register(CPacketToggleRender.class, CPacketToggleRender::encode, CPacketToggleRender::decode,
         CPacketToggleRender::handle);
+    register(CPacketPage.class, CPacketPage::encode, CPacketPage::decode, CPacketPage::handle);
+    register(CPacketToggleCosmetics.class, CPacketToggleCosmetics::encode,
+        CPacketToggleCosmetics::decode, CPacketToggleCosmetics::handle);
 
     // Server Packets
     register(SPacketSyncStack.class, SPacketSyncStack::encode, SPacketSyncStack::decode,
@@ -87,6 +93,7 @@ public class NetworkHandler {
         SPacketSyncModifiers::handle);
     register(SPacketSyncData.class, SPacketSyncData::encode, SPacketSyncData::decode,
         SPacketSyncData::handle);
+    register(SPacketPage.class, SPacketPage::encode, SPacketPage::decode, SPacketPage::handle);
   }
 
   private static <M> void register(Class<M> messageType, BiConsumer<M, FriendlyByteBuf> encoder,

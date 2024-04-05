@@ -42,6 +42,7 @@ public class CuriosClientConfig {
   public static class Client {
 
     public final BooleanValue renderCurios;
+    public final BooleanValue enableButton;
     public final IntValue buttonXOffset;
     public final IntValue buttonYOffset;
     public final IntValue creativeButtonXOffset;
@@ -54,6 +55,8 @@ public class CuriosClientConfig {
 
       renderCurios = builder.comment("Set to true to enable rendering curios")
           .translation(CONFIG_PREFIX + "renderCurios").define("renderCurios", true);
+      enableButton = builder.comment("Set to true to enable the Curios GUI button")
+          .translation(CONFIG_PREFIX + "enableButton").define("enableButton", true);
       buttonXOffset = builder.comment("The X-Offset for the Curios GUI button")
           .translation(CONFIG_PREFIX + "buttonXOffset")
           .defineInRange("buttonXOffset", 0, -100, 100);
@@ -74,8 +77,8 @@ public class CuriosClientConfig {
     }
 
     public enum ButtonCorner {
-      TOP_LEFT(26, -75, 73, -62), TOP_RIGHT(61, -75, 95, -62), BOTTOM_LEFT(26, -20, 73,
-          -29), BOTTOM_RIGHT(61, -20, 95, -29);
+      TOP_LEFT(26, -75, 73, -62), TOP_RIGHT(61, -75, 95, -62), BOTTOM_LEFT(26, -20, 73, -29),
+      BOTTOM_RIGHT(61, -20, 95, -29);
 
       final int xoffset;
       final int yoffset;

@@ -84,6 +84,7 @@ import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.event.CurioDropsEvent;
 import top.theillusivec4.curios.api.event.CurioUnequipEvent;
 import top.theillusivec4.curios.api.event.DropRulesEvent;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.api.type.capability.ICurio.DropRule;
@@ -219,7 +220,7 @@ public class CuriosEventHandler {
               PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),
               new SPacketSyncCurios(player.getId(), handler.getCurios()));
 
-          if (player.containerMenu instanceof CuriosContainer curiosContainer) {
+          if (player.containerMenu instanceof ICuriosMenu curiosContainer) {
             curiosContainer.resetSlots();
           }
         });

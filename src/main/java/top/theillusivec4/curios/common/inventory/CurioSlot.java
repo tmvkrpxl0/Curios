@@ -41,6 +41,16 @@ public class CurioSlot extends SlotItemHandler {
 
   private NonNullList<Boolean> renderStatuses;
   private boolean canToggleRender;
+  private boolean showCosmeticToggle;
+  private boolean isCosmetic;
+
+  public CurioSlot(Player player, IDynamicStackHandler handler, int index, String identifier,
+                   int xPosition, int yPosition, NonNullList<Boolean> renders,
+                   boolean canToggleRender, boolean showCosmeticToggle, boolean isCosmetic) {
+    this(player, handler, index, identifier, xPosition, yPosition, renders, canToggleRender);
+    this.showCosmeticToggle = showCosmeticToggle;
+    this.isCosmetic = isCosmetic;
+  }
 
   public CurioSlot(Player player, IDynamicStackHandler handler, int index, String identifier,
                    int xPosition, int yPosition, NonNullList<Boolean> renders,
@@ -64,6 +74,14 @@ public class CurioSlot extends SlotItemHandler {
     return this.canToggleRender;
   }
 
+  public boolean isCosmetic() {
+    return this.isCosmetic;
+  }
+
+  public boolean showCosmeticToggle() {
+    return this.showCosmeticToggle;
+  }
+
   public boolean getRenderStatus() {
 
     if (!this.canToggleRender) {
@@ -75,6 +93,10 @@ public class CurioSlot extends SlotItemHandler {
 
   @OnlyIn(Dist.CLIENT)
   public String getSlotName() {
+
+    if (this.isCosmetic) {
+      return I18n.get("curios.cosmetic") + " " + I18n.get("curios.identifier." + this.identifier);
+    }
     return I18n.get("curios.identifier." + this.identifier);
   }
 

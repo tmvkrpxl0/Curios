@@ -32,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.PacketDistributor;
+import top.theillusivec4.curios.api.client.ICuriosScreen;
 import top.theillusivec4.curios.common.network.NetworkHandler;
 import top.theillusivec4.curios.common.network.client.CPacketOpenCurios;
 import top.theillusivec4.curios.common.network.client.CPacketOpenVanilla;
@@ -39,6 +40,7 @@ import top.theillusivec4.curios.common.network.client.CPacketOpenVanilla;
 public class CuriosButton extends ImageButton {
 
   private final AbstractContainerScreen<?> parentGui;
+  private int panelWidth;
 
   CuriosButton(AbstractContainerScreen<?> parentGui, int xIn, int yIn, int widthIn, int heightIn,
                int textureOffsetX, int textureOffsetY, int yDiffText, ResourceLocation resource) {
@@ -51,7 +53,7 @@ public class CuriosButton extends ImageButton {
             ItemStack stack = mc.player.containerMenu.getCarried();
             mc.player.containerMenu.setCarried(ItemStack.EMPTY);
 
-            if (parentGui instanceof CuriosScreen) {
+            if (parentGui instanceof ICuriosScreen) {
               InventoryScreen inventory = new InventoryScreen(mc.player);
               mc.setScreen(inventory);
               mc.player.containerMenu.setCarried(stack);
@@ -79,7 +81,7 @@ public class CuriosButton extends ImageButton {
                            float partialTicks) {
     Tuple<Integer, Integer> offsets =
         CuriosScreen.getButtonOffset(parentGui instanceof CreativeModeInventoryScreen);
-    this.setX(parentGui.getGuiLeft() + offsets.getA());
+    this.setX(parentGui.getGuiLeft() + offsets.getA() + this.panelWidth);
     int yOffset = parentGui instanceof CreativeModeInventoryScreen ? 68 : 83;
     this.setY(parentGui.getGuiTop() + offsets.getB() + yOffset);
 
@@ -92,5 +94,9 @@ public class CuriosButton extends ImageButton {
       }
     }
     super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+  }
+
+  public void setPanelWidth(int panelWidth) {
+    this.panelWidth = panelWidth;
   }
 }
