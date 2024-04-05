@@ -19,6 +19,7 @@
 
 package top.theillusivec4.curios.common;
 
+import java.util.List;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -27,6 +28,8 @@ public class CuriosConfig {
 
   public static final ForgeConfigSpec SERVER_SPEC;
   public static final Server SERVER;
+  public static final ForgeConfigSpec COMMON_SPEC;
+  public static final Common COMMON;
   private static final String CONFIG_PREFIX = "gui." + CuriosApi.MODID + ".config.";
 
   static {
@@ -34,6 +37,23 @@ public class CuriosConfig {
         .configure(Server::new);
     SERVER_SPEC = specPair.getRight();
     SERVER = specPair.getLeft();
+    final Pair<Common, ForgeConfigSpec> cspecPair = new ForgeConfigSpec.Builder()
+        .configure(Common::new);
+    COMMON_SPEC = cspecPair.getRight();
+    COMMON = cspecPair.getLeft();
+  }
+
+  public static class Common {
+
+    public ForgeConfigSpec.ConfigValue<List<? extends String>> slots;
+
+    public Common(ForgeConfigSpec.Builder builder) {
+      slots = builder.comment("List of slots to create or modify.")
+          .translation(CONFIG_PREFIX + "slots")
+          .defineList("slots", List.of(), s -> s instanceof String);
+
+      builder.build();
+    }
   }
 
   public static class Server {

@@ -8,12 +8,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringTokenizer;
 import javax.annotation.Nonnull;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -31,6 +34,7 @@ import top.theillusivec4.curios.Curios;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
+import top.theillusivec4.curios.common.CuriosConfig;
 import top.theillusivec4.curios.common.slottype.LegacySlotManager;
 import top.theillusivec4.curios.common.slottype.SlotType;
 
@@ -41,6 +45,7 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
   public static CuriosSlotManager SERVER = new CuriosSlotManager();
   public static CuriosSlotManager CLIENT = new CuriosSlotManager();
   private Map<String, ISlotType> slots = ImmutableMap.of();
+  private Set<String> configSlots = ImmutableSet.of();
   private Map<String, ResourceLocation> icons = ImmutableMap.of();
   private Map<String, Set<String>> idToMods = ImmutableMap.of();
   private ICondition.IContext ctx = ICondition.IContext.EMPTY;
@@ -141,6 +146,17 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
         Curios.LOGGER.error("Parsing error loading curio slot {}", resourcelocation, e);
       }
     }
+
+    try {
+      Set<String> configs = fromConfig(map);
+      this.configSlots = ImmutableSet.copyOf(configs);
+
+      for (String id : configs) {
+        modMap.computeIfAbsent(id, (k) -> ImmutableSet.builder()).add("config");
+      }
+    } catch (IllegalArgumentException e) {
+      Curios.LOGGER.error("Config parsing error", e);
+    }
     this.slots = map.entrySet().stream()
         .collect(ImmutableMap.toImmutableMap(Map.Entry::getKey, entry -> entry.getValue().build()));
     this.idToMods = modMap.entrySet().stream()
@@ -182,6 +198,10 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
     this.icons = ImmutableMap.copyOf(icons);
   }
 
+  public Set<String> getConfigSlots() {
+    return this.configSlots;
+  }
+
   public Map<String, ResourceLocation> getIcons() {
     return this.icons;
   }
@@ -193,6 +213,93 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
 
   public Map<String, Set<String>> getModsFromSlots() {
     return this.idToMods;
+  }
+
+  public static Set<String> fromConfig(Map<String, SlotType.Builder> map)
+      throws IllegalArgumentException {
+    List<Map<String, String>> parsed = new ArrayList<>();
+    List<? extends String> list = CuriosConfig.COMMON.slots.get();
+    Set<String> results = new HashSet<>();
+
+    for (String s : list) {
+      StringTokenizer tokenizer = new StringTokenizer(s, ";");
+      Map<String, String> subMap = new HashMap<>();
+
+      while (tokenizer.hasMoreTokens()) {
+        String token = tokenizer.nextToken();
+        String[] keyValue = token.split("=");
+        subMap.put(keyValue[0], keyValue[1]);
+      }
+
+      if (subMap.containsKey("id")) {
+        parsed.add(subMap);
+      } else {
+        throw new IllegalArgumentException(
+            "Cannot load config entry " + s + " due to missing id field");
+      }
+    }
+
+    for (Map<String, String> entry : parsed) {
+      String id = entry.get("id");
+      SlotType.Builder builder = map.computeIfAbsent(id, (k) -> new SlotType.Builder(id));
+      Integer size = entry.containsKey("size") ? Integer.parseInt(entry.get("size")) : null;
+
+      if (size != null && size < 0) {
+        throw new IllegalArgumentException("Size cannot be less than 0!");
+      }
+      String operation = entry.getOrDefault("operation", "SET");
+
+      if (!operation.equals("SET") && !operation.equals("ADD") && !operation.equals("REMOVE")) {
+        throw new IllegalArgumentException(operation + " is not a valid operation!");
+      }
+      String dropRule = entry.getOrDefault("drop_rule", "");
+
+      if (!dropRule.isEmpty() && !EnumUtils.isValidEnum(ICurio.DropRule.class, dropRule)) {
+        throw new IllegalArgumentException(dropRule + " is not a valid drop rule!");
+      }
+      results.add(id);
+      boolean replace = true;
+      Integer order = entry.containsKey("order") ? Integer.parseInt(entry.get("order")) : null;
+      String icon = entry.getOrDefault("icon", "");
+      Boolean toggle =
+          entry.containsKey("render_toggle") ? Boolean.parseBoolean(entry.get("render_toggle")) :
+              null;
+      Boolean cosmetic =
+          entry.containsKey("add_cosmetic") ? Boolean.parseBoolean(entry.get("add_cosmetic")) :
+              null;
+      Boolean nativeGui =
+          entry.containsKey("use_native_gui") ? Boolean.parseBoolean(entry.get("use_native_gui")) :
+              null;
+
+      if (order != null) {
+        builder.order(order, replace);
+      }
+
+      if (!icon.isEmpty()) {
+        builder.icon(new ResourceLocation(icon));
+      }
+
+      if (!dropRule.isEmpty()) {
+        builder.dropRule(dropRule);
+      }
+
+      if (size != null) {
+        builder.size(size, operation, replace);
+      }
+
+      if (cosmetic != null) {
+        builder.hasCosmetic(cosmetic, replace);
+      }
+
+      if (nativeGui != null) {
+        builder.useNativeGui(nativeGui, replace);
+      }
+
+      if (toggle != null) {
+        builder.renderToggle(toggle, replace);
+      }
+    }
+    return results;
   }
 
   public static void fromJson(SlotType.Builder builder, JsonObject jsonObject)
