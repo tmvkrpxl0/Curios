@@ -62,7 +62,8 @@ public class CurioSlot extends SlotItemHandler {
     this.canToggleRender = canToggleRender;
     this.slotContext = new SlotContext(identifier, player, index, this instanceof CosmeticCurioSlot,
         this instanceof CosmeticCurioSlot || renders.get(index));
-    this.setBackground(InventoryMenu.BLOCK_ATLAS, CuriosApi.getSlotIcon(identifier));
+    CuriosApi.getSlot(identifier, player.level())
+        .ifPresent(slotType -> this.setBackground(InventoryMenu.BLOCK_ATLAS, slotType.getIcon()));
   }
 
   public String getIdentifier() {

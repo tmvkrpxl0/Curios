@@ -57,12 +57,12 @@ public class CuriosCommand {
     curiosCommand.then(Commands.literal("list").executes(context -> {
       Map<String, Set<String>> map = new HashMap<>(LegacySlotManager.getIdsToMods());
 
-      for (Map.Entry<String, Set<String>> entry : CuriosSlotManager.INSTANCE.getModsFromSlots()
+      for (Map.Entry<String, Set<String>> entry : CuriosSlotManager.SERVER.getModsFromSlots()
           .entrySet()) {
         map.computeIfAbsent(entry.getKey(), (k) -> new HashSet<>()).addAll(entry.getValue());
       }
 
-      for (Map.Entry<String, Set<String>> entry : CuriosEntityManager.INSTANCE.getModsFromSlots()
+      for (Map.Entry<String, Set<String>> entry : CuriosEntityManager.SERVER.getModsFromSlots()
           .entrySet()) {
         map.computeIfAbsent(entry.getKey(), (k) -> new HashSet<>()).addAll(entry.getValue());
       }

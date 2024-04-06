@@ -34,6 +34,8 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -63,7 +65,8 @@ public class CuriosHelper implements ICuriosHelper {
 
   @Override
   public Set<String> getCurioTags(Item item) {
-    return CuriosApi.getItemStackSlots(item.getDefaultInstance()).keySet();
+    return CuriosApi.getItemStackSlots(item.getDefaultInstance(),
+        FMLLoader.getDist() == Dist.CLIENT).keySet();
   }
 
   @Override

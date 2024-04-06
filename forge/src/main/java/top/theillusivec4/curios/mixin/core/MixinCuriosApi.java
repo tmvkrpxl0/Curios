@@ -55,38 +55,23 @@ public class MixinCuriosApi {
     ci.cancel();
   }
 
-  @Inject(at = @At("HEAD"), method = "getSlot", cancellable = true)
-  private static void curios$getSlot(String id, CallbackInfoReturnable<Optional<ISlotType>> cir) {
-    cir.setReturnValue(CuriosImplMixinHooks.getSlot(id));
+  @Inject(at = @At("HEAD"), method = "getSlots(Z)Ljava/util/Map;", cancellable = true)
+  private static void curios$getSlots(boolean isClient,
+                                      CallbackInfoReturnable<Map<String, ISlotType>> cir) {
+    cir.setReturnValue(CuriosImplMixinHooks.getSlots(isClient));
   }
 
-  @Inject(at = @At("HEAD"), method = "getSlotIcon", cancellable = true)
-  private static void curios$getSlotIcon(String id,
-                                         CallbackInfoReturnable<ResourceLocation> cir) {
-    cir.setReturnValue(CuriosImplMixinHooks.getSlotIcon(id));
-  }
-
-  @Inject(at = @At("HEAD"), method = "getSlots", cancellable = true)
-  private static void curios$getSlots(CallbackInfoReturnable<Map<String, ISlotType>> cir) {
-    cir.setReturnValue(CuriosImplMixinHooks.getSlots());
-  }
-
-  @Inject(at = @At("HEAD"), method = "getPlayerSlots", cancellable = true)
-  private static void curios$getPlayerSlots(CallbackInfoReturnable<Map<String, ISlotType>> cir) {
-    cir.setReturnValue(CuriosImplMixinHooks.getPlayerSlots());
-  }
-
-  @Inject(at = @At("HEAD"), method = "getEntitySlots", cancellable = true)
-  private static void curios$getEntitySlots(EntityType<?> type,
+  @Inject(at = @At("HEAD"), method = "getEntitySlots(Lnet/minecraft/world/entity/EntityType;Z)Ljava/util/Map;", cancellable = true)
+  private static void curios$getEntitySlots(EntityType<?> type, boolean isClient,
                                             CallbackInfoReturnable<Map<String, ISlotType>> cir) {
-    cir.setReturnValue(CuriosImplMixinHooks.getEntitySlots(type));
+    cir.setReturnValue(CuriosImplMixinHooks.getEntitySlots(type, isClient));
   }
 
-  @Inject(at = @At("HEAD"), method = "getItemStackSlots(Lnet/minecraft/world/item/ItemStack;)Ljava/util/Map;", cancellable = true)
-  private static void curios$getItemStackSlots(ItemStack stack,
+  @Inject(at = @At("HEAD"), method = "getItemStackSlots(Lnet/minecraft/world/item/ItemStack;Z)Ljava/util/Map;", cancellable = true)
+  private static void curios$getItemStackSlots(ItemStack stack, boolean isClient,
                                                CallbackInfoReturnable<Map<String, ISlotType>> cir) {
 
-    cir.setReturnValue(CuriosImplMixinHooks.getItemStackSlots(stack));
+    cir.setReturnValue(CuriosImplMixinHooks.getItemStackSlots(stack, isClient));
   }
 
   @Inject(at = @At("HEAD"), method = "getItemStackSlots(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;)Ljava/util/Map;", cancellable = true)

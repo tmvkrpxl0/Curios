@@ -32,6 +32,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.apache.logging.log4j.util.TriConsumer;
@@ -60,7 +61,7 @@ public interface ICuriosHelper {
   Optional<ICuriosItemHandler> getCuriosHandler(LivingEntity livingEntity);
 
   /**
-   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getItemStackSlots(ItemStack)}
+   * @deprecated See {@link top.theillusivec4.curios.api.CuriosApi#getItemStackSlots(ItemStack, Level)}
    */
   @Deprecated(since = "1.20.1", forRemoval = true)
   @ApiStatus.ScheduledForRemoval(inVersion = "1.22")

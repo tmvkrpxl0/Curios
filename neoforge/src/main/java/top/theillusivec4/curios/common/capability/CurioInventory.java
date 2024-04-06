@@ -40,33 +40,23 @@ public class CurioInventory implements INBTSerializable<CompoundTag> {
     this.curiosItemHandler = curiosItemHandler;
     this.curios.clear();
     LivingEntity livingEntity = curiosItemHandler.getWearer();
-    EntityType<?> type = livingEntity.getType();
 
     if (!this.markDeserialized) {
-      if (!livingEntity.level().isClientSide()) {
-        SortedSet<ISlotType> sorted = new TreeSet<>(CuriosApi.getEntitySlots(type).values());
+      SortedSet<ISlotType> sorted =
+          new TreeSet<>(CuriosApi.getEntitySlots(livingEntity).values());
 
-        for (ISlotType slotType : sorted) {
-          this.curios.put(slotType.getIdentifier(),
-              new CurioStacksHandler(curiosItemHandler, slotType.getIdentifier(),
-                  slotType.getSize(), slotType.useNativeGui(), slotType.hasCosmetic(),
-                  slotType.canToggleRendering(), slotType.getDropRule()));
-        }
-      } else {
-        Map<String, Integer> slots = CuriosEntityManager.INSTANCE.getClientSlots(type);
-
-        for (Map.Entry<String, Integer> entry : slots.entrySet()) {
-          this.curios.put(entry.getKey(),
-              new CurioStacksHandler(curiosItemHandler, entry.getKey(), entry.getValue(), true,
-                  true, true, ICurio.DropRule.DEFAULT));
-        }
+      for (ISlotType slotType : sorted) {
+        this.curios.put(slotType.getIdentifier(),
+            new CurioStacksHandler(curiosItemHandler, slotType.getIdentifier(), slotType.getSize(),
+                slotType.useNativeGui(), slotType.hasCosmetic(), slotType.canToggleRendering(),
+                slotType.getDropRule()));
       }
     } else {
       ListTag tagList = this.deserialized.getList("Curios", Tag.TAG_COMPOUND);
       Map<String, ICurioStacksHandler> curios = new LinkedHashMap<>();
       SortedMap<ISlotType, ICurioStacksHandler> sortedCurios = new TreeMap<>();
       SortedSet<ISlotType> sorted =
-          new TreeSet<>(CuriosApi.getEntitySlots(livingEntity.getType()).values());
+          new TreeSet<>(CuriosApi.getEntitySlots(livingEntity).values());
 
       for (ISlotType slotType : sorted) {
         sortedCurios.put(slotType,
@@ -83,7 +73,7 @@ public class CurioInventory implements INBTSerializable<CompoundTag> {
         prevStacksHandler.deserializeNBT(tag.getCompound("StacksHandler"));
 
         Optional<ISlotType> optionalType =
-            Optional.ofNullable(CuriosApi.getEntitySlots(livingEntity.getType()).get(identifier));
+            Optional.ofNullable(CuriosApi.getEntitySlots(livingEntity).get(identifier));
         optionalType.ifPresent(slotType -> {
           CurioStacksHandler newStacksHandler =
               new CurioStacksHandler(curiosItemHandler, slotType.getIdentifier(),

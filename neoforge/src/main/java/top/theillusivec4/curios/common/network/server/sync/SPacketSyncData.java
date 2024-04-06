@@ -33,26 +33,31 @@ public class SPacketSyncData implements CustomPacketPayload {
   public static final ResourceLocation ID =
       new ResourceLocation(CuriosConstants.MOD_ID, "sync_data");
 
-  public final ListTag data;
+  public final ListTag slotData;
+  public final ListTag entityData;
 
-  public SPacketSyncData(ListTag data) {
-    this.data = data;
+  public SPacketSyncData(ListTag slotData, ListTag entityData) {
+    this.slotData = slotData;
+    this.entityData = entityData;
   }
 
   public SPacketSyncData(final FriendlyByteBuf buf) {
     CompoundTag tag = buf.readNbt();
 
     if (tag != null) {
-      this.data = tag.getList("Data", Tag.TAG_COMPOUND);
+      this.slotData = tag.getList("SlotData", Tag.TAG_COMPOUND);
+      this.entityData = tag.getList("EntityData", Tag.TAG_COMPOUND);
     } else {
-      this.data = new ListTag();
+      this.slotData = new ListTag();
+      this.entityData = new ListTag();
     }
   }
 
   @Override
   public void write(@Nonnull FriendlyByteBuf buf) {
     CompoundTag tag = new CompoundTag();
-    tag.put("Data", this.data);
+    tag.put("SlotData", this.slotData);
+    tag.put("EntityData", this.entityData);
     buf.writeNbt(tag);
   }
 

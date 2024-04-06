@@ -360,7 +360,9 @@ public class CuriosContainer extends RecipeBookMenu<CraftingContainer> implement
   @Override
   public void removed(@Nonnull Player playerIn) {
     super.removed(playerIn);
-    if (this.skip) return;
+    if (this.skip) {
+      return;
+    }
     this.craftResult.clearContent();
 
     if (!playerIn.level().isClientSide) {
@@ -427,7 +429,8 @@ public class CuriosContainer extends RecipeBookMenu<CraftingContainer> implement
         if (!this.moveItemStackTo(itemstack1, i, i + 1, false)) {
           return ItemStack.EMPTY;
         }
-      } else if (index < 46 && !CuriosApi.getItemStackSlots(itemstack).isEmpty()) {
+      } else if (index < 46 &&
+          !CuriosApi.getItemStackSlots(itemstack, playerIn.level()).isEmpty()) {
 
         if (!this.moveItemStackTo(itemstack1, 46, this.slots.size(), false)) {
           return ItemStack.EMPTY;

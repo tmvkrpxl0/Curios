@@ -25,18 +25,22 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.event.network.CustomPayloadEvent;
 import top.theillusivec4.curios.common.data.CuriosEntityManager;
+import top.theillusivec4.curios.common.data.CuriosSlotManager;
 
 public class SPacketSyncData {
 
-  private final ListTag data;
+  private final ListTag slotData;
+  private final ListTag entityData;
 
-  public SPacketSyncData(ListTag data) {
-    this.data = data;
+  public SPacketSyncData(ListTag slotData, ListTag entityData) {
+    this.slotData = slotData;
+    this.entityData = entityData;
   }
 
   public static void encode(SPacketSyncData msg, FriendlyByteBuf buf) {
     CompoundTag tag = new CompoundTag();
-    tag.put("Data", msg.data);
+    tag.put("SlotData", msg.slotData);
+    tag.put("EntityData", msg.entityData);
     buf.writeNbt(tag);
   }
 
@@ -44,13 +48,17 @@ public class SPacketSyncData {
     CompoundTag tag = buf.readNbt();
 
     if (tag != null) {
-      return new SPacketSyncData(tag.getList("Data", Tag.TAG_COMPOUND));
+      return new SPacketSyncData(tag.getList("SlotData", Tag.TAG_COMPOUND),
+          tag.getList("EntityData", Tag.TAG_COMPOUND));
     }
-    return new SPacketSyncData(new ListTag());
+    return new SPacketSyncData(new ListTag(), new ListTag());
   }
 
   public static void handle(SPacketSyncData msg, CustomPayloadEvent.Context ctx) {
-    ctx.enqueueWork(() -> CuriosEntityManager.applySyncPacket(msg.data));
+    ctx.enqueueWork(() -> {
+      CuriosSlotManager.applySyncPacket(msg.slotData);
+      CuriosEntityManager.applySyncPacket(msg.entityData);
+    });
     ctx.setPacketHandled(true);
   }
 }

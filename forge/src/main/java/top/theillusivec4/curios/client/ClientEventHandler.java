@@ -43,11 +43,13 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.PacketDistributor;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotAttribute;
@@ -145,7 +147,7 @@ public class ClientEventHandler {
       }
 
       Map<String, ISlotType> map = player != null ? CuriosApi.getItemStackSlots(stack, player) :
-          CuriosApi.getItemStackSlots(stack);
+          CuriosApi.getItemStackSlots(stack, FMLLoader.getDist() == Dist.CLIENT);
       Set<String> curioTags = map.keySet();
       List<String> slots = new ArrayList<>(curioTags);
 

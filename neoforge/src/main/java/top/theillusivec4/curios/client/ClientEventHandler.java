@@ -44,7 +44,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.event.TickEvent;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
@@ -143,7 +145,7 @@ public class ClientEventHandler {
       }
 
       Map<String, ISlotType> map = player != null ? CuriosApi.getItemStackSlots(stack, player) :
-          CuriosApi.getItemStackSlots(stack);
+          CuriosApi.getItemStackSlots(stack, FMLLoader.getDist() == Dist.CLIENT);
       Set<String> curioTags = map.keySet();
       List<String> slots = new ArrayList<>(curioTags);
 

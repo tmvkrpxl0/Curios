@@ -98,26 +98,14 @@ public class CurioInventoryCapability {
       if (this.wearer != null) {
         this.curios.clear();
         this.invalidStacks.clear();
+        SortedSet<ISlotType> sorted =
+            new TreeSet<>(CuriosApi.getEntitySlots(this.wearer).values());
 
-        if (!this.wearer.level().isClientSide()) {
-          SortedSet<ISlotType> sorted =
-              new TreeSet<>(CuriosApi.getEntitySlots(this.wearer.getType()).values());
-
-          for (ISlotType slotType : sorted) {
-            this.curios.put(slotType.getIdentifier(),
-                new CurioStacksHandler(this, slotType.getIdentifier(), slotType.getSize(),
-                    slotType.useNativeGui(), slotType.hasCosmetic(), slotType.canToggleRendering(),
-                    slotType.getDropRule()));
-          }
-        } else {
-          Map<String, Integer> slots =
-              CuriosEntityManager.INSTANCE.getClientSlots(this.wearer.getType());
-
-          for (Map.Entry<String, Integer> entry : slots.entrySet()) {
-            this.curios.put(entry.getKey(),
-                new CurioStacksHandler(this, entry.getKey(), entry.getValue(), true, true, true,
-                    ICurio.DropRule.DEFAULT));
-          }
+        for (ISlotType slotType : sorted) {
+          this.curios.put(slotType.getIdentifier(),
+              new CurioStacksHandler(this, slotType.getIdentifier(), slotType.getSize(),
+                  slotType.useNativeGui(), slotType.hasCosmetic(), slotType.canToggleRendering(),
+                  slotType.getDropRule()));
         }
       }
     }
@@ -622,7 +610,7 @@ public class CurioInventoryCapability {
         Map<String, ICurioStacksHandler> curios = new LinkedHashMap<>();
         SortedMap<ISlotType, ICurioStacksHandler> sortedCurios = new TreeMap<>();
         SortedSet<ISlotType> sorted =
-            new TreeSet<>(CuriosApi.getEntitySlots(this.wearer.getType()).values());
+            new TreeSet<>(CuriosApi.getEntitySlots(this.wearer).values());
 
         for (ISlotType slotType : sorted) {
           sortedCurios.put(slotType,
@@ -638,7 +626,7 @@ public class CurioInventoryCapability {
           prevStacksHandler.deserializeNBT(tag.getCompound("StacksHandler"));
 
           Optional<ISlotType> optionalType =
-              Optional.ofNullable(CuriosApi.getEntitySlots(this.wearer.getType()).get(identifier));
+              Optional.ofNullable(CuriosApi.getEntitySlots(this.wearer).get(identifier));
           optionalType.ifPresent(type -> {
             CurioStacksHandler newStacksHandler =
                 new CurioStacksHandler(this, type.getIdentifier(), type.getSize(),
@@ -732,13 +720,7 @@ public class CurioInventoryCapability {
     @Override
     public <T> LazyOptional<T> getCapability(@Nullable Capability<T> capability, Direction facing) {
 
-      if (!this.wearer.level().isClientSide() &&
-          CuriosApi.getEntitySlots(this.wearer.getType()).isEmpty()) {
-        return LazyOptional.empty();
-      }
-
-      if (this.wearer.level().isClientSide() &&
-          !CuriosEntityManager.INSTANCE.hasSlots(this.wearer.getType())) {
+      if (CuriosApi.getEntitySlots(this.wearer).isEmpty()) {
         return LazyOptional.empty();
       }
       return CuriosCapability.INVENTORY.orEmpty(capability, this.optional);

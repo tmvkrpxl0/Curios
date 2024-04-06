@@ -34,8 +34,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import top.theillusivec4.curios.api.type.ISlotType;
@@ -66,89 +70,135 @@ public final class CuriosApi {
   }
 
   /**
-   * Gets the registered slot type server-side for the identifier, if it exists.
-   * <br>
-   * This will always be empty client-side.
+   * Gets the registered slot type for the identifier, if it exists, on the given level.
    *
-   * @param id The slot type identifier
+   * @param id    The slot type identifier
+   * @param level The level for the slot type
    * @return The registered slot type or empty if it doesn't exist
    */
-  public static Optional<ISlotType> getSlot(String id) {
-    apiError();
-    return Optional.empty();
+  public static Optional<ISlotType> getSlot(String id, Level level) {
+    return CuriosApi.getSlot(id, level.isClientSide());
   }
 
   /**
-   * Gets the registered slot type icon client-side for the identifier.
-   * <br>
-   * This will always return the default curio icon server-side. For accurate server-side calls,
-   * see {@link CuriosApi#getSlot(String)} and {@link ISlotType#getIcon()}.
+   * Gets the registered slot type for the identifier, if it exists, on the given side.
    *
-   * @param id The slot type identifier
+   * @param id       The slot type identifier
+   * @param isClient True for client-side slots, false for server-side slots
    * @return The registered slot type or empty if it doesn't exist
    */
-  @Nonnull
-  public static ResourceLocation getSlotIcon(String id) {
-    apiError();
-    return new ResourceLocation(MODID, "slot/empty_curio_slot");
+  public static Optional<ISlotType> getSlot(String id, boolean isClient) {
+    return Optional.ofNullable(CuriosApi.getSlots(isClient).get(id));
   }
 
   /**
-   * Gets all the registered slot types server-side.
-   * <br>
-   * This will always be empty client-side.
+   * Gets all the registered slot types on the given level.
    *
+   * @param level The level for the slot type
    * @return The registered slot types
    */
-  public static Map<String, ISlotType> getSlots() {
-    apiError();
-    return new HashMap<>();
+  public static Map<String, ISlotType> getSlots(Level level) {
+    return CuriosApi.getSlots(level.isClientSide());
   }
 
   /**
-   * Gets all the registered slot types provided to player entities server-side.
-   * <br>
-   * This will always be empty client-side.
+   * Gets all the registered slot types on the given side.
    *
+   * @param isClient True for client-side slots, false for server-side slots
+   * @return The registered slot types
+   */
+  public static Map<String, ISlotType> getSlots(boolean isClient) {
+    apiError();
+    return Map.of();
+  }
+
+  /**
+   * Gets all the registered slot types provided to player entities on the given level.
+   *
+   * @param level The level for the slot types
    * @return The slot types provided to player entities
    */
-  public static Map<String, ISlotType> getPlayerSlots() {
-    apiError();
-    return new HashMap<>();
+  public static Map<String, ISlotType> getPlayerSlots(Level level) {
+    return CuriosApi.getPlayerSlots(level.isClientSide());
   }
 
   /**
-   * Gets all the registered slot types provided to an entity type server-side.
-   * <br>
-   * This will always be empty client-side.
+   * Gets all the registered slot types provided to player entities on the given side.
+   *
+   * @param isClient True for client-side slots, false for server-side slots
+   * @return The slot types provided to player entities
+   */
+  public static Map<String, ISlotType> getPlayerSlots(boolean isClient) {
+    return CuriosApi.getEntitySlots(EntityType.PLAYER, isClient);
+  }
+
+  /**
+   * Gets all the registered slot types provided the player entity.
+   *
+   * @param player The {@link Player} for the slot types
+   * @return The slot types provided to the player entity
+   */
+  public static Map<String, ISlotType> getPlayerSlots(Player player) {
+    return CuriosApi.getEntitySlots(player);
+  }
+
+  /**
+   * Gets all the registered slot types provided to an entity.
+   *
+   * @param livingEntity The {@link LivingEntity} for the slot types
+   * @return The slot types provided to the entity
+   */
+  public static Map<String, ISlotType> getEntitySlots(LivingEntity livingEntity) {
+    return CuriosApi.getEntitySlots(livingEntity.getType(), livingEntity.level());
+  }
+
+  /**
+   * Gets all the registered slot types provided to an entity type on the given level.
    *
    * @param type The entity type for the slot types
    * @return The slot types provided to the entity type
    */
-  public static Map<String, ISlotType> getEntitySlots(EntityType<?> type) {
-    apiError();
-    return new HashMap<>();
+  public static Map<String, ISlotType> getEntitySlots(EntityType<?> type, Level level) {
+    return CuriosApi.getEntitySlots(type, level.isClientSide());
   }
 
   /**
-   * Gets all the registered slot types for the provided ItemStack server-side.
-   * <br>
-   * Client-side, the map will be populated by filler {@link ISlotType} that contain only the
-   * identifier and the rest of the information is placeholder.
+   * Gets all the registered slot types provided to an entity.
+   *
+   * @param type     The entity type for the slot types
+   * @param isClient True for client-side slots, false for server-side slots
+   * @return The slot types provided to the entity
+   */
+  public static Map<String, ISlotType> getEntitySlots(EntityType<?> type, boolean isClient) {
+    apiError();
+    return Map.of();
+  }
+
+  /**
+   * Gets all the registered slot types for the provided ItemStack and level.
    *
    * @param stack The ItemStack for the slot types
+   * @param level The level for the ItemStack
    * @return The slot types for the provided ItemStack
    */
-  public static Map<String, ISlotType> getItemStackSlots(ItemStack stack) {
-    apiError();
-    return new HashMap<>();
+  public static Map<String, ISlotType> getItemStackSlots(ItemStack stack, Level level) {
+    return CuriosApi.getItemStackSlots(stack, level.isClientSide());
   }
 
   /**
-   * Gets all the registered slot types for the provided ItemStack and entity server-side.
-   * <br>
-   * Client-side, the map will be populated by filler {@link ISlotType} that contain only the
-   * identifier and the rest of the information is placeholder.
+   * Gets all the registered slot types for the provided ItemStack and level.
+   *
+   * @param stack    The ItemStack for the slot types
+   * @param isClient True for client-side slots, false for server-side slots
+   * @return The slot types for the provided ItemStack
+   */
+  public static Map<String, ISlotType> getItemStackSlots(ItemStack stack, boolean isClient) {
+    apiError();
+    return Map.of();
+  }
+
+  /**
+   * Gets all the registered slot types for the provided ItemStack and entity.
    *
    * @param stack        The ItemStack for the slot types
    * @param livingEntity The entity with the slot types
@@ -157,7 +207,7 @@ public final class CuriosApi {
   public static Map<String, ISlotType> getItemStackSlots(ItemStack stack,
                                                          LivingEntity livingEntity) {
     apiError();
-    return new HashMap<>();
+    return Map.of();
   }
 
   /**
@@ -291,6 +341,65 @@ public final class CuriosApi {
   }
 
   // ========= DEPRECATED =============
+
+  /**
+   * @deprecated See {@link CuriosApi#getSlot(String, Level)}
+   * and {@link CuriosApi#getSlot(String, boolean)}
+   */
+  @Deprecated(since = "1.20.1")
+  @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
+  public static Optional<ISlotType> getSlot(String id) {
+    return CuriosApi.getSlot(id, false);
+  }
+
+  /**
+   * @deprecated See {@link CuriosApi#getSlot(String, Level)} and {@link ISlotType#getIcon()}.
+   */
+  @Nonnull
+  public static ResourceLocation getSlotIcon(String id) {
+    return CuriosApi.getSlot(id, false).map(ISlotType::getIcon)
+        .orElse(new ResourceLocation(CuriosApi.MODID, "slot/empty_curio_slot"));
+  }
+
+  /**
+   * @deprecated See {@link CuriosApi#getSlots(Level)} and {@link CuriosApi#getSlots(boolean)}
+   */
+  @Deprecated(since = "1.20.1")
+  @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
+  public static Map<String, ISlotType> getSlots() {
+    return CuriosApi.getSlots(false);
+  }
+
+  /**
+   * @deprecated See {@link CuriosApi#getEntitySlots(EntityType, Level)},
+   * {@link CuriosApi#getEntitySlots(EntityType, boolean)},
+   * and {@link CuriosApi#getEntitySlots(LivingEntity)}
+   */
+  @Deprecated(since = "1.20.1")
+  @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
+  public static Map<String, ISlotType> getEntitySlots(EntityType<?> type) {
+    return CuriosApi.getEntitySlots(type, false);
+  }
+
+  /**
+   * @deprecated See {@link CuriosApi#getPlayerSlots(Level)},
+   * {@link CuriosApi#getPlayerSlots(boolean)}, and {@link CuriosApi#getPlayerSlots(Player)}
+   */
+  @Deprecated(since = "1.20.1")
+  @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
+  public static Map<String, ISlotType> getPlayerSlots() {
+    return CuriosApi.getPlayerSlots(false);
+  }
+
+  /**
+   * @deprecated See {@link CuriosApi#getItemStackSlots(ItemStack, Level)}
+   * and {@link CuriosApi#getItemStackSlots(ItemStack, boolean)}
+   */
+  @Deprecated(since = "1.20.1")
+  @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
+  public static Map<String, ISlotType> getItemStackSlots(ItemStack stack) {
+    return CuriosApi.getItemStackSlots(stack, FMLLoader.getDist() == Dist.CLIENT);
+  }
 
   private static IIconHelper iconHelper;
 

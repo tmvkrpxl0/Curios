@@ -130,7 +130,7 @@ public class SetCurioAttributesFunction extends LootItemConditionalFunction {
           if (rl.getNamespace().equals("curios")) {
             String identifier = rl.getPath();
 
-            if (CuriosApi.getSlot(identifier).isEmpty()) {
+            if (CuriosApi.getSlot(identifier, false).isEmpty()) {
               throw new JsonSyntaxException("Unknown curios slot type: " + identifier);
             }
             attribute = SlotAttribute.getOrCreate(identifier);

@@ -22,7 +22,6 @@ package top.theillusivec4.curios;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nonnull;
-import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.resources.PlayerSkin;
@@ -34,7 +33,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -122,19 +120,10 @@ public class Curios {
           (entity, ctx) -> {
 
             if (entity instanceof LivingEntity livingEntity) {
-              Level level = livingEntity.level();
-              EntityType<?> type = livingEntity.getType();
 
-              if (!level.isClientSide() &&
-                  CuriosApi.getEntitySlots(type).isEmpty()) {
-                return null;
+              if (!CuriosApi.getEntitySlots(livingEntity).isEmpty()) {
+                return new CurioItemHandler(livingEntity);
               }
-
-              if (level.isClientSide() &&
-                  !CuriosEntityManager.INSTANCE.hasSlots(type)) {
-                return null;
-              }
-              return new CurioItemHandler(livingEntity);
             }
             return null;
           });
@@ -143,19 +132,10 @@ public class Curios {
           (entity, ctx) -> {
 
             if (entity instanceof LivingEntity livingEntity) {
-              Level level = livingEntity.level();
-              EntityType<?> type = livingEntity.getType();
 
-              if (!level.isClientSide() &&
-                  CuriosApi.getEntitySlots(type).isEmpty()) {
-                return null;
+              if (!CuriosApi.getEntitySlots(livingEntity).isEmpty()) {
+                return new CurioInventoryCapability(livingEntity);
               }
-
-              if (level.isClientSide() &&
-                  !CuriosEntityManager.INSTANCE.hasSlots(type)) {
-                return null;
-              }
-              return new CurioInventoryCapability(livingEntity);
             }
             return null;
           });
@@ -187,7 +167,7 @@ public class Curios {
     CuriosApi.setSlotHelper(new SlotHelper());
     Set<String> slotIds = new HashSet<>();
 
-    for (ISlotType value : CuriosSlotManager.INSTANCE.getSlots().values()) {
+    for (ISlotType value : CuriosSlotManager.SERVER.getSlots().values()) {
       CuriosApi.getSlotHelper().addSlotType(value);
       slotIds.add(value.getIdentifier());
     }
@@ -204,10 +184,10 @@ public class Curios {
 
   private void reload(final AddReloadListenerEvent evt) {
     ICondition.IContext ctx = evt.getConditionContext();
-    CuriosSlotManager.INSTANCE = new CuriosSlotManager(ctx);
-    evt.addListener(CuriosSlotManager.INSTANCE);
-    CuriosEntityManager.INSTANCE = new CuriosEntityManager(ctx);
-    evt.addListener(CuriosEntityManager.INSTANCE);
+    CuriosSlotManager.SERVER = new CuriosSlotManager(ctx);
+    evt.addListener(CuriosSlotManager.SERVER);
+    CuriosEntityManager.SERVER = new CuriosEntityManager(ctx);
+    evt.addListener(CuriosEntityManager.SERVER);
     evt.addListener(new SimplePreparableReloadListener<Void>() {
       @Nonnull
       @Override
