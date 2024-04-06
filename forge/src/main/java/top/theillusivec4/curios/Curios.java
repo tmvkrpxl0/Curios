@@ -93,6 +93,7 @@ public class Curios {
     MinecraftForge.EVENT_BUS.addListener(this::registerCommands);
     MinecraftForge.EVENT_BUS.addListener(this::reload);
     ModLoadingContext.get().registerConfig(Type.CLIENT, CuriosClientConfig.CLIENT_SPEC);
+    ModLoadingContext.get().registerConfig(Type.COMMON, CuriosConfig.COMMON_SPEC);
     ModLoadingContext.get().registerConfig(Type.SERVER, CuriosConfig.SERVER_SPEC);
   }
 
