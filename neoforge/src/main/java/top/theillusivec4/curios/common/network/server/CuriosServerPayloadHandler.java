@@ -150,10 +150,10 @@ public class CuriosServerPayloadHandler {
           String id = stacksHandler.getIdentifier();
 
           for (int i = 0; i < stackHandler.getSlots(); i++) {
-            UUID uuid = UUID.nameUUIDFromBytes((id + i).getBytes());
             NonNullList<Boolean> renderStates = stacksHandler.getRenders();
             SlotContext slotContext = new SlotContext(id, player, i, false,
                 renderStates.size() > i && renderStates.get(i));
+            UUID uuid = CuriosApi.getSlotUuid(slotContext);
             ItemStack stack = stackHandler.getStackInSlot(i);
             Multimap<Attribute, AttributeModifier> map =
                 CuriosApi.getAttributeModifiers(slotContext, uuid, stack);

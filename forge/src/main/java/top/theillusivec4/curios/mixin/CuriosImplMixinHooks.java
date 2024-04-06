@@ -266,4 +266,11 @@ public class CuriosImplMixinHooks {
             slotContext.index()),
         PacketDistributor.TRACKING_ENTITY_AND_SELF.with(slotContext.entity()));
   }
+
+  private static final Map<String, UUID> UUIDS = new HashMap<>();
+
+  public static UUID getSlotUuid(SlotContext slotContext) {
+    String key = slotContext.identifier() + slotContext.index();
+    return UUIDS.computeIfAbsent(key, (k) -> UUID.nameUUIDFromBytes(k.getBytes()));
+  }
 }

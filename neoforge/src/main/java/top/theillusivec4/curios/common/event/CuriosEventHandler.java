@@ -558,7 +558,7 @@ public class CuriosEventHandler {
                   renderStates.size() > index && renderStates.get(index), HandlerType.EQUIPMENT);
               NeoForge.EVENT_BUS
                   .post(new CurioChangeEvent(livingEntity, identifier, i, prevStack, stack));
-              UUID uuid = UUID.nameUUIDFromBytes((identifier + i).getBytes());
+              UUID uuid = CuriosApi.getSlotUuid(slotContext);
 
               if (!prevStack.isEmpty()) {
                 Multimap<Attribute, AttributeModifier> map =

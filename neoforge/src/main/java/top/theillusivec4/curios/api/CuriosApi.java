@@ -263,6 +263,17 @@ public final class CuriosApi {
   }
 
   /**
+   * Gets a UUID based on the provided {@link SlotContext}.
+   *
+   * @param slotContext The SlotContext to base the UUID on
+   * @return The UUID based on the SlotContext
+   */
+  public static UUID getSlotUuid(SlotContext slotContext) {
+    apiError();
+    return UUID.randomUUID();
+  }
+
+  /**
    * Performs breaking behavior used from the single-input consumer in {@link ItemStack#hurtAndBreak(int, LivingEntity, Consumer)}
    * <br>
    * This will be necessary in order to trigger break animations in curio slots

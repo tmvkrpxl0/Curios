@@ -154,6 +154,11 @@ public class MixinCuriosApi {
     ci.cancel();
   }
 
+  @Inject(at = @At("HEAD"), method = "getSlotUuid", cancellable = true)
+  private static void curios$getUuid(SlotContext slotContext, CallbackInfoReturnable<UUID> ci) {
+    ci.setReturnValue(CuriosImplMixinHooks.getSlotUuid(slotContext));
+  }
+
   @Inject(at = @At("HEAD"), method = "broadcastCurioBreakEvent", cancellable = true)
   private static void curios$broadcastCurioBreakEvent(SlotContext slotContext, CallbackInfo ci) {
     CuriosImplMixinHooks.broadcastCurioBreakEvent(slotContext);
