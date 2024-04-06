@@ -52,6 +52,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotAttribute;
 import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
@@ -83,7 +84,7 @@ public class ClientEventHandler {
     LocalPlayer localPlayer = mc.player;
 
     if (localPlayer != null && localPlayer.hasContainerOpen() &&
-        !(localPlayer.containerMenu instanceof CuriosContainer) &&
+        !(localPlayer.containerMenu instanceof ICuriosMenu) &&
         evt.getKey() == KeyRegistry.openCurios.getKey().getValue() &&
         evt.getAction() == InputConstants.PRESS) {
       localPlayer.closeContainer();

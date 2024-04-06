@@ -45,11 +45,11 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotAttribute;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.event.SlotModifiersUpdatedEvent;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
-import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
 
 public class CurioStacksHandler implements ICurioStacksHandler {
 
@@ -516,8 +516,8 @@ public class CurioStacksHandler implements ICurioStacksHandler {
               new SlotModifiersUpdatedEvent(this.itemHandler.getWearer(), Set.of(this.identifier)));
 
           if (this.itemHandler.getWearer() instanceof Player player &&
-              player.containerMenu instanceof CuriosContainer) {
-            ((CuriosContainer) player.containerMenu).resetSlots();
+              player.containerMenu instanceof ICuriosMenu curiosMenu) {
+            curiosMenu.resetSlots();
           }
         }
       }

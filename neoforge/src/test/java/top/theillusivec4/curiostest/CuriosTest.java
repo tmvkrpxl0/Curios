@@ -153,7 +153,7 @@ public class CuriosTest {
             new AttributeModifier(uuid, CuriosTest.MODID + ":knockback_resist", 0.2,
                 AttributeModifier.Operation.ADDITION));
         CuriosApi.addSlotModifier(atts, "ring", uuid, 1, AttributeModifier.Operation.ADDITION);
-        CuriosApi.addSlotModifier(atts, "curio", uuid, -1, AttributeModifier.Operation.ADDITION);
+//        CuriosApi.addSlotModifier(atts, "curio", uuid, -1, AttributeModifier.Operation.ADDITION);
         return atts;
       }
 

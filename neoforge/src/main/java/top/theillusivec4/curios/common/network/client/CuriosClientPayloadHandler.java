@@ -23,15 +23,19 @@ import net.neoforged.neoforge.network.handling.PlayPayloadContext;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.event.SlotModifiersUpdatedEvent;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.client.gui.CuriosScreen;
+import top.theillusivec4.curios.client.gui.CuriosScreenV2;
 import top.theillusivec4.curios.common.data.CuriosEntityManager;
 import top.theillusivec4.curios.common.data.CuriosSlotManager;
 import top.theillusivec4.curios.common.inventory.CurioStacksHandler;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
+import top.theillusivec4.curios.common.inventory.container.CuriosContainerV2;
 import top.theillusivec4.curios.common.network.server.SPacketBreak;
 import top.theillusivec4.curios.common.network.server.SPacketGrabbedItem;
+import top.theillusivec4.curios.common.network.server.SPacketPage;
 import top.theillusivec4.curios.common.network.server.SPacketScroll;
 import top.theillusivec4.curios.common.network.server.SPacketSetIcons;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios;
@@ -94,6 +98,26 @@ public class CuriosClientPayloadHandler {
 
       if (screen instanceof CuriosScreen) {
         ((CuriosScreen) screen).updateRenderButtons();
+      }
+    });
+  }
+
+  public void handlePage(final SPacketPage data, final PlayPayloadContext ctx) {
+    handleData(ctx, () -> {
+      Minecraft mc = Minecraft.getInstance();
+      LocalPlayer clientPlayer = mc.player;
+      Screen screen = mc.screen;
+
+      if (clientPlayer != null) {
+        AbstractContainerMenu container = clientPlayer.containerMenu;
+
+        if (container instanceof CuriosContainerV2 && container.containerId == data.windowId()) {
+          ((CuriosContainerV2) container).setPage(data.page());
+        }
+      }
+
+      if (screen instanceof CuriosScreenV2) {
+        ((CuriosScreenV2) screen).updateRenderButtons();
       }
     });
   }
@@ -175,8 +199,8 @@ public class CuriosClientPayloadHandler {
 
                 if (entity instanceof LocalPlayer localPlayer) {
 
-                  if (localPlayer.containerMenu instanceof CuriosContainer) {
-                    ((CuriosContainer) localPlayer.containerMenu).resetSlots();
+                  if (localPlayer.containerMenu instanceof ICuriosMenu curiosMenu) {
+                    curiosMenu.resetSlots();
                   }
                 }
               });
@@ -210,7 +234,7 @@ public class CuriosClientPayloadHandler {
                 handler.setCurios(stacks);
 
                 if (entity instanceof LocalPlayer localPlayer &&
-                    localPlayer.containerMenu instanceof CuriosContainer curiosContainer) {
+                    localPlayer.containerMenu instanceof ICuriosMenu curiosContainer) {
                   curiosContainer.resetSlots();
                 }
               });

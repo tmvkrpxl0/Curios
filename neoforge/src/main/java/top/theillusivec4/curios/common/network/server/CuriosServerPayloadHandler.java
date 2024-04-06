@@ -21,10 +21,13 @@ import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainerProvider;
+import top.theillusivec4.curios.common.inventory.container.CuriosContainerV2;
 import top.theillusivec4.curios.common.network.client.CPacketDestroy;
 import top.theillusivec4.curios.common.network.client.CPacketOpenCurios;
 import top.theillusivec4.curios.common.network.client.CPacketOpenVanilla;
+import top.theillusivec4.curios.common.network.client.CPacketPage;
 import top.theillusivec4.curios.common.network.client.CPacketScroll;
+import top.theillusivec4.curios.common.network.client.CPacketToggleCosmetics;
 import top.theillusivec4.curios.common.network.client.CPacketToggleRender;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncRender;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncStack;
@@ -60,6 +63,33 @@ public class CuriosServerPayloadHandler {
                   new SPacketSyncRender(player.getId(), data.identifier(), data.index(), value));
             }
           });
+    }));
+  }
+
+  public void handlePage(final CPacketPage data,
+                         final PlayPayloadContext ctx) {
+    handleData(ctx, () -> ctx.player().ifPresent(player -> {
+      AbstractContainerMenu container = player.containerMenu;
+
+      if (container instanceof CuriosContainerV2 && container.containerId == data.windowId()) {
+
+        if (data.next()) {
+          ((CuriosContainerV2) container).nextPage();
+        } else {
+          ((CuriosContainerV2) container).prevPage();
+        }
+      }
+    }));
+  }
+
+  public void handlerToggleCosmetics(final CPacketToggleCosmetics data,
+                                     final PlayPayloadContext ctx) {
+    handleData(ctx, () -> ctx.player().ifPresent(player -> {
+      AbstractContainerMenu container = player.containerMenu;
+
+      if (container instanceof CuriosContainerV2 && container.containerId == data.windowId()) {
+        ((CuriosContainerV2) container).toggleCosmetics();
+      }
     }));
   }
 

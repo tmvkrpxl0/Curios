@@ -23,12 +23,15 @@ import net.neoforged.neoforge.network.registration.IPayloadRegistrar;
 import top.theillusivec4.curios.common.network.client.CPacketDestroy;
 import top.theillusivec4.curios.common.network.client.CPacketOpenCurios;
 import top.theillusivec4.curios.common.network.client.CPacketOpenVanilla;
+import top.theillusivec4.curios.common.network.client.CPacketPage;
 import top.theillusivec4.curios.common.network.client.CPacketScroll;
+import top.theillusivec4.curios.common.network.client.CPacketToggleCosmetics;
 import top.theillusivec4.curios.common.network.client.CPacketToggleRender;
 import top.theillusivec4.curios.common.network.client.CuriosClientPayloadHandler;
 import top.theillusivec4.curios.common.network.server.CuriosServerPayloadHandler;
 import top.theillusivec4.curios.common.network.server.SPacketBreak;
 import top.theillusivec4.curios.common.network.server.SPacketGrabbedItem;
+import top.theillusivec4.curios.common.network.server.SPacketPage;
 import top.theillusivec4.curios.common.network.server.SPacketScroll;
 import top.theillusivec4.curios.common.network.server.SPacketSetIcons;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios;
@@ -49,8 +52,12 @@ public class NetworkHandler {
         handler -> handler.server(CuriosServerPayloadHandler.getInstance()::handleOpenVanilla));
     registrar.play(CPacketScroll.ID, CPacketScroll::new,
         handler -> handler.server(CuriosServerPayloadHandler.getInstance()::handleScroll));
+    registrar.play(CPacketPage.ID, CPacketPage::new,
+        handler -> handler.server(CuriosServerPayloadHandler.getInstance()::handlePage));
     registrar.play(CPacketToggleRender.ID, CPacketToggleRender::new,
         handler -> handler.server(CuriosServerPayloadHandler.getInstance()::handlerToggleRender));
+    registrar.play(CPacketToggleCosmetics.ID, CPacketToggleCosmetics::new,
+        handler -> handler.server(CuriosServerPayloadHandler.getInstance()::handlerToggleCosmetics));
 
     // Server Packets
     registrar.play(SPacketSyncStack.ID, SPacketSyncStack::new,
@@ -69,6 +76,8 @@ public class NetworkHandler {
         handler -> handler.client(CuriosClientPayloadHandler.getInstance()::handleBreak));
     registrar.play(SPacketScroll.ID, SPacketScroll::new,
         handler -> handler.client(CuriosClientPayloadHandler.getInstance()::handleScroll));
+    registrar.play(SPacketPage.ID, SPacketPage::new,
+        handler -> handler.client(CuriosClientPayloadHandler.getInstance()::handlePage));
     registrar.play(SPacketSetIcons.ID, SPacketSetIcons::new,
         handler -> handler.client(CuriosClientPayloadHandler.getInstance()::handleSetIcons));
   }

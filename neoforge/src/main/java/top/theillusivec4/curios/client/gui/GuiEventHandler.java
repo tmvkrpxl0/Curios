@@ -31,7 +31,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
-import top.theillusivec4.curios.common.network.NetworkHandler;
+import top.theillusivec4.curios.client.CuriosClientConfig;
 import top.theillusivec4.curios.common.network.client.CPacketDestroy;
 
 public class GuiEventHandler {
@@ -39,6 +39,10 @@ public class GuiEventHandler {
   @SubscribeEvent
   public void onInventoryGuiInit(ScreenEvent.Init.Post evt) {
     Screen screen = evt.getScreen();
+
+    if (!CuriosClientConfig.CLIENT.enableButton.get()) {
+      return;
+    }
 
     if (screen instanceof InventoryScreen || screen instanceof CreativeModeInventoryScreen) {
       AbstractContainerScreen<?> gui = (AbstractContainerScreen<?>) screen;

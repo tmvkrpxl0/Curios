@@ -81,6 +81,7 @@ import top.theillusivec4.curios.api.event.CurioDropsEvent;
 import top.theillusivec4.curios.api.event.CurioEquipEvent;
 import top.theillusivec4.curios.api.event.CurioUnequipEvent;
 import top.theillusivec4.curios.api.event.DropRulesEvent;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.api.type.capability.ICurio.DropRule;
@@ -91,7 +92,6 @@ import top.theillusivec4.curios.common.CuriosConfig;
 import top.theillusivec4.curios.common.CuriosRegistry;
 import top.theillusivec4.curios.common.data.CuriosEntityManager;
 import top.theillusivec4.curios.common.data.CuriosSlotManager;
-import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
 import top.theillusivec4.curios.common.network.server.SPacketSetIcons;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncData;
@@ -207,7 +207,7 @@ public class CuriosEventHandler {
           PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player)
               .send(new SPacketSyncCurios(player.getId(), handler.getCurios()));
 
-          if (player.containerMenu instanceof CuriosContainer curiosContainer) {
+          if (player.containerMenu instanceof ICuriosMenu curiosContainer) {
             curiosContainer.resetSlots();
           }
         });
@@ -226,7 +226,7 @@ public class CuriosEventHandler {
             PacketDistributor.PLAYER.with(mp)
                 .send(new SPacketSyncCurios(mp.getId(), handler.getCurios()));
 
-            if (mp.containerMenu instanceof CuriosContainer curiosContainer) {
+            if (mp.containerMenu instanceof ICuriosMenu curiosContainer) {
               curiosContainer.resetSlots();
             }
           });

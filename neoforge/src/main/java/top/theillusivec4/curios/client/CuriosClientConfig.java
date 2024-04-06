@@ -39,6 +39,7 @@ public class CuriosClientConfig {
   public static class Client {
 
     public final ModConfigSpec.BooleanValue renderCurios;
+    public final ModConfigSpec.BooleanValue enableButton;
     public final ModConfigSpec.IntValue buttonXOffset;
     public final ModConfigSpec.IntValue buttonYOffset;
     public final ModConfigSpec.IntValue creativeButtonXOffset;
@@ -51,6 +52,8 @@ public class CuriosClientConfig {
 
       renderCurios = builder.comment("Set to true to enable rendering curios")
           .translation(CONFIG_PREFIX + "renderCurios").define("renderCurios", true);
+      enableButton = builder.comment("Set to true to enable the Curios GUI button")
+          .translation(CONFIG_PREFIX + "enableButton").define("enableButton", true);
       buttonXOffset = builder.comment("The X-Offset for the Curios GUI button")
           .translation(CONFIG_PREFIX + "buttonXOffset")
           .defineInRange("buttonXOffset", 0, -100, 100);

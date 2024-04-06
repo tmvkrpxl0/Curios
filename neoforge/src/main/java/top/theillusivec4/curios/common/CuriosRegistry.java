@@ -36,6 +36,7 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.common.capability.CurioInventory;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
+import top.theillusivec4.curios.common.inventory.container.CuriosContainerV2;
 import top.theillusivec4.curios.common.util.EquipCurioTrigger;
 import top.theillusivec4.curios.common.util.SetCurioAttributesFunction;
 import top.theillusivec4.curios.server.command.CurioArgumentType;
@@ -58,9 +59,13 @@ public class CuriosRegistry {
       CURIO_SLOT_ARGUMENT = ARGUMENT_TYPES.register("slot_type",
       () -> ArgumentTypeInfos.registerByClass(CurioArgumentType.class,
           SingletonArgumentInfo.contextFree(CurioArgumentType::slot)));
+
   public static final Supplier<MenuType<CuriosContainer>> CURIO_MENU =
       MENU_TYPES.register("curios_container",
           () -> IMenuTypeExtension.create(CuriosContainer::new));
+  public static final Supplier<MenuType<CuriosContainerV2>> CURIO_MENU_NEW =
+      MENU_TYPES.register("curios_container_v2",
+          () -> IMenuTypeExtension.create(CuriosContainerV2::new));
   public static final Supplier<LootItemFunctionType> CURIO_ATTRIBUTES =
       LOOT_FUNCTIONS.register("set_curio_attributes",
           () -> new LootItemFunctionType(SetCurioAttributesFunction.CODEC));

@@ -20,6 +20,8 @@
 package top.theillusivec4.curios.client.gui;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
+import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -32,7 +34,6 @@ import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
@@ -47,31 +48,30 @@ import top.theillusivec4.curios.client.CuriosClientConfig.Client.ButtonCorner;
 import top.theillusivec4.curios.client.KeyRegistry;
 import top.theillusivec4.curios.common.inventory.CosmeticCurioSlot;
 import top.theillusivec4.curios.common.inventory.CurioSlot;
-import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
+import top.theillusivec4.curios.common.inventory.container.CuriosContainerV2;
+import top.theillusivec4.curios.common.network.client.CPacketPage;
 import top.theillusivec4.curios.common.network.client.CPacketToggleRender;
 
-public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer>
+public class CuriosScreenV2 extends EffectRenderingInventoryScreen<CuriosContainerV2>
     implements RecipeUpdateListener, ICuriosScreen {
 
   static final ResourceLocation CURIO_INVENTORY = new ResourceLocation(CuriosConstants.MOD_ID,
-      "textures/gui/curios/inventory.png");
-  private static final ResourceLocation SCROLLER =
-      new ResourceLocation("container/creative_inventory/scroller");
-
-  private static float currentScroll;
+      "textures/gui/curios/inventory_revamp.png");
 
   private final RecipeBookComponent recipeBookGui = new RecipeBookComponent();
-
-  public boolean hasScrollBar;
   public boolean widthTooNarrow;
 
+  private ImageButton recipeBookButton;
   private CuriosButton buttonCurios;
-  private boolean isScrolling;
+  private CosmeticButton cosmeticButton;
+  private PageButton nextPage;
+  private PageButton prevPage;
   private boolean buttonClicked;
   private boolean isRenderButtonHovered;
+  public int panelWidth = 0;
 
-  public CuriosScreen(CuriosContainer curiosContainer, Inventory playerInventory,
-                      Component title) {
+  public CuriosScreenV2(CuriosContainerV2 curiosContainer, Inventory playerInventory,
+                        Component title) {
     super(curiosContainer, playerInventory, title);
   }
 
@@ -93,31 +93,15 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
 
   @Override
   public void init() {
-    super.init();
 
     if (this.minecraft != null) {
-
-      if (this.minecraft.player != null) {
-        this.hasScrollBar = CuriosApi.getCuriosInventory(this.minecraft.player)
-            .map(handler -> handler.getVisibleSlots() > 8).orElse(false);
-
-        if (this.hasScrollBar) {
-          this.menu.scrollTo(currentScroll);
-        }
-      }
-      int neededWidth = 431;
-
-      if (this.hasScrollBar) {
-        neededWidth += 30;
-      }
-
-      if (this.menu.hasCosmeticColumn()) {
-        neededWidth += 40;
-      }
-      this.widthTooNarrow = this.width < neededWidth;
+      this.panelWidth = this.menu.panelWidth;
+      this.imageWidth = 176 + this.panelWidth;
+      this.leftPos = (this.width - this.imageWidth) / 2;
+      this.topPos = (this.height - this.imageHeight) / 2;
+      this.widthTooNarrow = true;
       this.recipeBookGui
           .init(this.width, this.height, this.minecraft, this.widthTooNarrow, this.menu);
-      this.updateScreenPosition();
       this.addWidget(this.recipeBookGui);
       this.setInitialFocus(this.recipeBookGui);
 
@@ -134,37 +118,61 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
       if (this.getMinecraft().player != null && this.getMinecraft().player.isCreative()
           && this.recipeBookGui.isVisible()) {
         this.recipeBookGui.toggleVisibility();
-        this.updateScreenPosition();
       }
 
       Tuple<Integer, Integer> offsets = getButtonOffset(false);
-      this.buttonCurios = new CuriosButton(this, this.getGuiLeft() + offsets.getA() - 2,
-          this.height / 2 + offsets.getB() - 2, 10, 10, CuriosButton.BIG);
+      this.buttonCurios =
+          new CuriosButton(this, this.getGuiLeft() + offsets.getA() - 2,
+              this.height / 2 + offsets.getB() - 2, 10, 10, CuriosButton.BIG);
 
       if (CuriosClientConfig.CLIENT.enableButton.get()) {
         this.addRenderableWidget(this.buttonCurios);
       }
 
       if (!this.menu.player.isCreative()) {
-        this.addRenderableWidget(
-            new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18,
+        this.recipeBookButton =
+            new ImageButton(this.leftPos + 104 + this.panelWidth, this.height / 2 - 22, 20, 18,
                 RecipeBookComponent.RECIPE_BUTTON_SPRITES, (button) -> {
               this.recipeBookGui.toggleVisibility();
-              this.updateScreenPosition();
-              button.setPosition(this.leftPos + 104, this.height / 2 - 22);
-              this.buttonCurios.setPosition(this.leftPos + offsets.getA(),
+              button.setPosition(this.leftPos + 104 + this.panelWidth, this.height / 2 - 22);
+              this.buttonCurios.setPosition(this.leftPos + offsets.getA() + this.panelWidth,
                   this.height / 2 + offsets.getB());
-            }));
+            });
+        this.addRenderableWidget(this.recipeBookButton);
       }
-
       this.updateRenderButtons();
     }
   }
 
   public void updateRenderButtons() {
-    this.narratables.removeIf(widget -> widget instanceof RenderButton);
-    this.children.removeIf(widget -> widget instanceof RenderButton);
-    this.renderables.removeIf(widget -> widget instanceof RenderButton);
+    this.narratables.removeIf(
+        widget -> widget instanceof RenderButton || widget instanceof CosmeticButton ||
+            widget instanceof PageButton);
+    this.children.removeIf(
+        widget -> widget instanceof RenderButton || widget instanceof CosmeticButton ||
+            widget instanceof PageButton);
+    this.renderables.removeIf(
+        widget -> widget instanceof RenderButton || widget instanceof CosmeticButton ||
+            widget instanceof PageButton);
+    this.panelWidth = this.menu.panelWidth;
+    this.imageWidth = 176 + this.panelWidth;
+    this.leftPos = (this.width - this.imageWidth) / 2;
+    this.recipeBookButton.setPosition(this.leftPos + 104 + this.panelWidth, this.height / 2 - 22);
+
+    if (this.menu.hasCosmetics) {
+      this.cosmeticButton =
+          new CosmeticButton(this, this.getGuiLeft() + 17, this.getGuiTop() - 18, 20, 17);
+      this.addRenderableWidget(this.cosmeticButton);
+    }
+
+    if (this.menu.totalPages > 1) {
+      this.nextPage = new PageButton(this, this.getGuiLeft() + 17, this.getGuiTop() + 2, 11, 12,
+          PageButton.Type.NEXT);
+      this.addRenderableWidget(this.nextPage);
+      this.prevPage = new PageButton(this, this.getGuiLeft() + 17, this.getGuiTop() + 2, 11, 12,
+          PageButton.Type.PREVIOUS);
+      this.addRenderableWidget(this.prevPage);
+    }
 
     for (Slot inventorySlot : this.menu.slots) {
 
@@ -172,8 +180,8 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
           !(inventorySlot instanceof CosmeticCurioSlot)) {
 
         if (curioSlot.canToggleRender()) {
-          this.addRenderableWidget(new RenderButton(curioSlot, this.leftPos + inventorySlot.x + 11,
-              this.topPos + inventorySlot.y - 3, 8, 8, 75, 0, CURIO_INVENTORY,
+          this.addRenderableWidget(new RenderButton(curioSlot, this.leftPos + inventorySlot.x + 12,
+              this.topPos + inventorySlot.y - 1, 8, 8, 75, 0, CURIO_INVENTORY,
               (button) -> PacketDistributor.SERVER.noArg().send(
                   new CPacketToggleRender(curioSlot.getIdentifier(),
                       inventorySlot.getSlotIndex()))));
@@ -182,51 +190,16 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
     }
   }
 
-  private void updateScreenPosition() {
-    int i;
-
-    if (this.recipeBookGui.isVisible() && !this.widthTooNarrow) {
-      int offset = 148;
-
-      if (this.hasScrollBar) {
-        offset -= 30;
-      }
-
-      if (this.menu.hasCosmeticColumn()) {
-        offset -= 40;
-      }
-      i = 177 + (this.width - this.imageWidth - offset) / 2;
-    } else {
-      i = (this.width - this.imageWidth) / 2;
-    }
-    this.leftPos = i;
-    this.updateRenderButtons();
-  }
-
   @Override
   public void containerTick() {
     super.containerTick();
     this.recipeBookGui.tick();
   }
 
-  private boolean inScrollBar(double mouseX, double mouseY) {
-    int i = this.leftPos;
-    int j = this.topPos;
-    int k = i - 34;
-    int l = j + 12;
-    int i1 = k + 14;
-    int j1 = l + 139;
-
-    if (this.menu.hasCosmeticColumn()) {
-      i1 -= 19;
-      k -= 19;
-    }
-    return mouseX >= k && mouseY >= l && mouseX < i1 && mouseY < j1;
-  }
-
   @Override
   public void render(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY,
                      float partialTicks) {
+    this.buttonCurios.setPanelWidth(this.panelWidth);
 
     if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
       this.renderBackground(guiGraphics, mouseX, mouseY, partialTicks);
@@ -289,7 +262,6 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
 
     if (this.recipeBookGui.isVisible() && this.widthTooNarrow) {
       this.recipeBookGui.toggleVisibility();
-      this.updateScreenPosition();
       return true;
     } else if (KeyRegistry.openCurios
         .isActiveAndMatches(InputConstants.getKey(p_keyPressed_1_, p_keyPressed_2_))) {
@@ -308,7 +280,7 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
   protected void renderLabels(@Nonnull GuiGraphics guiGraphics, int mouseX, int mouseY) {
 
     if (this.minecraft != null && this.minecraft.player != null) {
-      guiGraphics.drawString(this.font, this.title, 97, 6, 4210752, false);
+      guiGraphics.drawString(this.font, this.title, 97 + panelWidth, 6, 4210752, false);
     }
   }
 
@@ -321,45 +293,84 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
                           int mouseY) {
 
     if (this.minecraft != null && this.minecraft.player != null) {
-      int i = this.leftPos;
+
+      if (scrollCooldown > 0 && this.minecraft.player.tickCount % 5 == 0) {
+        scrollCooldown--;
+      }
+      this.panelWidth = this.menu.panelWidth;
+      this.imageWidth = 176 + this.panelWidth;
+      this.leftPos = (this.width - this.imageWidth) / 2;
+      int i = this.leftPos + this.panelWidth;
       int j = this.topPos;
-      guiGraphics.blit(INVENTORY_LOCATION, i, j, 0, 0, this.imageWidth, this.imageHeight);
+      guiGraphics.blit(INVENTORY_LOCATION, i, j, 0, 0, 176, this.imageHeight);
       InventoryScreen.renderEntityInInventoryFollowsMouse(guiGraphics, i + 26, j + 8, i + 75,
           j + 78, 30, 0.0625F, mouseX, mouseY, this.minecraft.player);
       CuriosApi.getCuriosInventory(this.minecraft.player).ifPresent(handler -> {
-        int slotCount = handler.getVisibleSlots();
+        int xOffset = -33;
+        int yOffset = j;
+        boolean pageOffset = this.menu.totalPages > 1;
 
-        if (slotCount > 0) {
-          int upperHeight = 7 + Math.min(slotCount, 9) * 18;
-          int xTexOffset = 0;
-          int width = 27;
-          int xOffset = -26;
+        if (this.menu.hasCosmetics) {
+          guiGraphics.blit(CURIO_INVENTORY, i + xOffset + 2, yOffset - 23, 32, 0, 28, 24);
+        }
+        List<Integer> grid = this.menu.grid;
+        xOffset -= (grid.size() - 1) * 18;
 
-          if (this.menu.hasCosmeticColumn()) {
-            xTexOffset = 92;
-            width = 46;
-            xOffset -= 19;
+        // render backplate
+        for (int r = 0; r < grid.size(); r++) {
+          int rows = grid.get(0);
+          int upperHeight = 7 + rows * 18;
+          int xTexOffset = 91;
+
+          if (pageOffset) {
+            upperHeight += 8;
           }
-          guiGraphics.blit(CURIO_INVENTORY, i + xOffset, j + 4, xTexOffset, 0, width, upperHeight);
 
-          if (slotCount <= 8) {
-            guiGraphics.blit(CURIO_INVENTORY, i + xOffset, j + 4 + upperHeight, xTexOffset, 151,
-                width, 7);
+          if (r != 0) {
+            xTexOffset += 7;
+          }
+          guiGraphics.blit(CURIO_INVENTORY, i + xOffset, yOffset, xTexOffset, 0, 25,
+              upperHeight);
+          guiGraphics.blit(CURIO_INVENTORY, i + xOffset, yOffset + upperHeight, xTexOffset, 159, 25,
+              7);
+
+          if (grid.size() == 1) {
+            xTexOffset += 7;
+            guiGraphics.blit(CURIO_INVENTORY, i + xOffset + 7, yOffset, xTexOffset, 0, 25,
+                upperHeight);
+            guiGraphics.blit(CURIO_INVENTORY, i + xOffset + 7, yOffset + upperHeight, xTexOffset,
+                159, 25, 7);
+          }
+
+          if (r == 0) {
+            xOffset += 25;
           } else {
-            guiGraphics.blit(CURIO_INVENTORY, i + xOffset - 16, j + 4, 27, 0, 23, 158);
-            guiGraphics.blitSprite(SCROLLER, i + xOffset - 8, j + 12 + (int) (127f * currentScroll),
-                12, 15);
-          }
-
-          for (Slot slot : this.menu.slots) {
-
-            if (slot instanceof CosmeticCurioSlot) {
-              int x = this.leftPos + slot.x - 1;
-              int y = this.topPos + slot.y - 1;
-              guiGraphics.blit(CURIO_INVENTORY, x, y, 138, 0, 18, 18);
-            }
+            xOffset += 18;
           }
         }
+        xOffset -= (grid.size()) * 18;
+
+        if (pageOffset) {
+          yOffset += 8;
+        }
+
+        // render slots
+        for (int rows : grid) {
+          int upperHeight = rows * 18;
+
+          guiGraphics.blit(CURIO_INVENTORY, i + xOffset, yOffset + 7, 7, 7, 18, upperHeight);
+          xOffset += 18;
+        }
+        RenderSystem.enableBlend();
+
+        for (Slot slot : this.menu.slots) {
+
+          if (slot instanceof CurioSlot curioSlot && curioSlot.isCosmetic()) {
+            guiGraphics.blit(CURIO_INVENTORY, slot.x + this.getGuiLeft() - 1,
+                slot.y + this.getGuiTop() - 1, 32, 50, 18, 18);
+          }
+        }
+        RenderSystem.disableBlend();
       });
     }
   }
@@ -387,9 +398,6 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
 
     if (this.recipeBookGui.mouseClicked(mouseX, mouseY, mouseButton)) {
       return true;
-    } else if (this.inScrollBar(mouseX, mouseY)) {
-      this.isScrolling = this.needsScrollBars();
-      return true;
     }
     return this.widthTooNarrow && this.recipeBookGui.isVisible() || super
         .mouseClicked(mouseX, mouseY, mouseButton);
@@ -397,10 +405,6 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
 
   @Override
   public boolean mouseReleased(double mouseReleased1, double mouseReleased3, int mouseReleased5) {
-
-    if (mouseReleased5 == 0) {
-      this.isScrolling = false;
-    }
 
     if (this.buttonClicked) {
       this.buttonClicked = false;
@@ -410,44 +414,20 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
     }
   }
 
-  @Override
-  public boolean mouseDragged(double pMouseDragged1, double pMouseDragged3, int pMouseDragged5,
-                              double pMouseDragged6, double pMouseDragged8) {
-
-    if (this.isScrolling) {
-      int i = this.topPos + 8;
-      int j = i + 148;
-      currentScroll = ((float) pMouseDragged3 - i - 7.5F) / (j - i - 15.0F);
-      currentScroll = Mth.clamp(currentScroll, 0.0F, 1.0F);
-      this.menu.scrollTo(currentScroll);
-      return true;
-    } else {
-      return super.mouseDragged(pMouseDragged1, pMouseDragged3, pMouseDragged5, pMouseDragged6,
-          pMouseDragged8);
-    }
-  }
+  private static int scrollCooldown = 0;
 
   @Override
-  public boolean mouseScrolled(double pMouseScrolled1, double pMouseScrolled3,
-                               double pMouseScrolled5, double dragY) {
+  public boolean mouseScrolled(double p_94686_, double p_94687_, double p_94688_,
+                               double p_294830_) {
 
-    if (!this.needsScrollBars()) {
-      return false;
-    } else {
-      int i = 1;
-
-      if ((this.menu).curiosHandler != null) {
-        i = (int) Math.floor((double) (this.menu.curiosHandler).getVisibleSlots() / 8);
-      }
-      currentScroll = (float) (currentScroll - dragY / i);
-      currentScroll = Mth.clamp(currentScroll, 0.0F, 1.0F);
-      this.menu.scrollTo(currentScroll);
-      return true;
+    if (this.menu.totalPages > 1 && p_94686_ > this.getGuiLeft() &&
+        p_94686_ < this.getGuiLeft() + this.panelWidth && p_94687_ > this.getGuiTop() &&
+        p_94687_ < this.getGuiTop() + this.imageHeight && scrollCooldown <= 0) {
+      PacketDistributor.SERVER.noArg()
+          .send(new CPacketPage(this.getMenu().containerId, p_294830_ == -1));
+      scrollCooldown = 4;
     }
-  }
-
-  private boolean needsScrollBars() {
-    return this.menu.canScroll();
+    return super.mouseScrolled(p_94686_, p_94687_, p_94688_, p_294830_);
   }
 
   @Override
@@ -455,10 +435,8 @@ public class CuriosScreen extends EffectRenderingInventoryScreen<CuriosContainer
                                       int mouseButton) {
     boolean flag = mouseX < guiLeftIn || mouseY < guiTopIn || mouseX >= guiLeftIn + this.imageWidth
         || mouseY >= guiTopIn + this.imageHeight;
-    return this.recipeBookGui
-        .hasClickedOutside(mouseX, mouseY, this.leftPos, this.topPos, this.imageWidth,
-            this.imageHeight,
-            mouseButton) && flag;
+    return this.recipeBookGui.hasClickedOutside(mouseX, mouseY, this.leftPos, this.topPos,
+        this.imageWidth, this.imageHeight, mouseButton) && flag;
   }
 
   @Override
