@@ -19,8 +19,13 @@
 
 package top.theillusivec4.curios.common.slottype;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.EnumUtils;
 import top.theillusivec4.curios.CuriosConstants;
@@ -37,6 +42,7 @@ public final class SlotType implements ISlotType {
   private final ResourceLocation icon;
   private final ICurio.DropRule dropRule;
   private final boolean renderToggle;
+  private final Set<ResourceLocation> validators;
 
   public static ISlotType from(CompoundTag tag) {
     SlotType.Builder builder = new Builder(tag.getString("Identifier"));
@@ -47,6 +53,15 @@ public final class SlotType implements ISlotType {
     builder.hasCosmetic(tag.getBoolean("HasCosmetic"));
     builder.renderToggle(tag.getBoolean("ToggleRender"));
     builder.dropRule(ICurio.DropRule.values()[tag.getInt("DropRule")]);
+    ListTag list = tag.getList("Validators", Tag.TAG_STRING);
+    Set<ResourceLocation> preds = new HashSet<>();
+    for (Tag tag1 : list) {
+
+      if (tag1 instanceof StringTag stringTag) {
+        preds.add(new ResourceLocation(stringTag.getAsString()));
+      }
+    }
+    builder.validators(preds);
     return builder.build();
   }
 
@@ -59,6 +74,7 @@ public final class SlotType implements ISlotType {
     this.icon = builder.icon;
     this.dropRule = builder.dropRule;
     this.renderToggle = builder.renderToggle;
+    this.validators = builder.validators;
   }
 
   @Override
@@ -102,6 +118,11 @@ public final class SlotType implements ISlotType {
   }
 
   @Override
+  public Set<ResourceLocation> getValidators() {
+    return this.validators;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -141,6 +162,12 @@ public final class SlotType implements ISlotType {
     tag.putBoolean("HasCosmetic", this.hasCosmetic);
     tag.putBoolean("ToggleRender", this.renderToggle);
     tag.putInt("DropRule", this.dropRule.ordinal());
+    ListTag list = new ListTag();
+
+    for (ResourceLocation slotResultPredicate : this.validators) {
+      list.add(StringTag.valueOf(slotResultPredicate.toString()));
+    }
+    tag.put("Validators", list);
     return tag;
   }
 
@@ -156,6 +183,7 @@ public final class SlotType implements ISlotType {
     private ResourceLocation icon =
         new ResourceLocation(CuriosConstants.MOD_ID, "slot/empty_curio_slot");
     private ICurio.DropRule dropRule = ICurio.DropRule.DEFAULT;
+    private Set<ResourceLocation> validators = null;
 
     public Builder(String identifier) {
       this.identifier = identifier;
@@ -195,6 +223,10 @@ public final class SlotType implements ISlotType {
 
       if (builder.dropRule != null) {
         this.dropRule(builder.dropRule);
+      }
+
+      if (builder.validators != null) {
+        this.validators(builder.validators);
       }
     }
 
@@ -286,6 +318,11 @@ public final class SlotType implements ISlotType {
       return this;
     }
 
+    public Builder validators(Set<ResourceLocation> slotResultPredicates) {
+      this.validators = slotResultPredicates;
+      return this;
+    }
+
     public SlotType build() {
 
       if (this.order == null) {
@@ -308,6 +345,10 @@ public final class SlotType implements ISlotType {
 
       if (this.renderToggle == null) {
         this.renderToggle = true;
+      }
+
+      if (this.validators == null) {
+        this.validators = Set.of(new ResourceLocation(CuriosConstants.MOD_ID, "tag"));
       }
       return new SlotType(this);
     }

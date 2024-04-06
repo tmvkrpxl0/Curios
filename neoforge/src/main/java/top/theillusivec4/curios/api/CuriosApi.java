@@ -25,8 +25,10 @@ import com.mojang.logging.LogUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -311,6 +313,45 @@ public final class CuriosApi {
                                  String slot) {
     apiError();
   }
+
+  /**
+   * Registers a new predicate keyed to a {@link ResourceLocation} for deciding which slots are
+   * assigned to a given {@link ItemStack}.
+   *
+   * @param resourceLocation The unique {@link ResourceLocation} of the validator
+   * @param predicate        The predicate to register for a given stack and {@link SlotResult}
+   */
+  public static void registerCurioPredicate(ResourceLocation resourceLocation,
+                                            Predicate<SlotResult> predicate) {
+    apiError();
+  }
+
+  /**
+   * Gets an existing predicate, or empty if none found, keyed to a {@link ResourceLocation} for
+   * deciding which slots are assigned to a given {@link ItemStack}.
+   *
+   * @param resourceLocation The unique {@link ResourceLocation} of the validator
+   * @return An Optional of the predicate found for the ResourceLocation, or empty otherwise
+   */
+  public static Optional<Predicate<SlotResult>> getCurioPredicate(
+      ResourceLocation resourceLocation) {
+    apiError();
+    return Optional.empty();
+  }
+
+  /**
+   * Evaluates a set of predicates to determine if a given {@link SlotResult} is a valid assignment.
+   *
+   * @param predicates A set of ResourceLocations representing the predicates to iterate
+   * @param slotResult The SlotResult containing the {@link SlotContext} and {@link ItemStack}
+   * @return True if any of the predicates pass, false otherwise
+   */
+  public static boolean testCurioPredicates(Set<ResourceLocation> predicates,
+                                            SlotResult slotResult) {
+    apiError();
+    return true;
+  }
+
 
   /**
    * Gets a UUID based on the provided {@link SlotContext}.

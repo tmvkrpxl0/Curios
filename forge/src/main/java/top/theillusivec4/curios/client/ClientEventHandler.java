@@ -148,7 +148,11 @@ public class ClientEventHandler {
 
       Map<String, ISlotType> map = player != null ? CuriosApi.getItemStackSlots(stack, player) :
           CuriosApi.getItemStackSlots(stack, FMLLoader.getDist() == Dist.CLIENT);
-      Set<String> curioTags = map.keySet();
+      Set<String> curioTags = Set.copyOf(map.keySet());
+
+      if (curioTags.contains("curio")) {
+        curioTags = Set.of("curio");
+      }
       List<String> slots = new ArrayList<>(curioTags);
 
       if (!slots.isEmpty()) {

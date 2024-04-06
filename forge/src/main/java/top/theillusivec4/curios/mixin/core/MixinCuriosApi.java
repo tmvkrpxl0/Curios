@@ -22,7 +22,9 @@ package top.theillusivec4.curios.mixin.core;
 import com.google.common.collect.Multimap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.SlotResult;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -137,6 +140,27 @@ public class MixinCuriosApi {
                                          CallbackInfo ci) {
     CuriosImplMixinHooks.addModifier(stack, attribute, name, uuid, amount, operation, slot);
     ci.cancel();
+  }
+
+  @Inject(at = @At("HEAD"), method = "registerCurioPredicate", cancellable = true)
+  private static void curios$registerSlotResultPredicate(ResourceLocation resourceLocation,
+                                                         Predicate<SlotResult> validator,
+                                                         CallbackInfo ci) {
+    CuriosImplMixinHooks.registerCurioPredicate(resourceLocation, validator);
+    ci.cancel();
+  }
+
+  @Inject(at = @At("HEAD"), method = "getCurioPredicate", cancellable = true)
+  private static void curios$getSlotResultPredicate(ResourceLocation resourceLocation,
+                                                    CallbackInfoReturnable<Optional<Predicate<SlotResult>>> ci) {
+    ci.setReturnValue(CuriosImplMixinHooks.getCurioPredicate(resourceLocation));
+  }
+
+  @Inject(at = @At("HEAD"), method = "testCurioPredicates", cancellable = true)
+  private static void curios$evaluateSlotResultPredicates(Set<ResourceLocation> predicates,
+                                                          SlotResult slotResult,
+                                                          CallbackInfoReturnable<Boolean> ci) {
+    ci.setReturnValue(CuriosImplMixinHooks.testCurioPredicates(predicates, slotResult));
   }
 
   @Inject(at = @At("HEAD"), method = "getSlotUuid", cancellable = true)

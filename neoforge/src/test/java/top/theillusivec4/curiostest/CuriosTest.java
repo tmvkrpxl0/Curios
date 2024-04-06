@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.neoforged.bus.api.IEventBus;
@@ -88,6 +90,8 @@ public class CuriosTest {
     eventBus.addListener(this::registerCaps);
     eventBus.addListener(this::gatherData);
     NeoForge.EVENT_BUS.addListener(this::attributeModifier);
+    CuriosApi.registerCurioPredicate(new ResourceLocation(MODID, "test"),
+        slotResult -> slotResult.stack().getItem() == Items.OAK_BOAT);
   }
 
   private void gatherData(final GatherDataEvent evt) {

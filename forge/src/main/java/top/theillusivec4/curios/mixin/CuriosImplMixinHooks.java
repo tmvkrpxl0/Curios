@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -48,6 +50,7 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.SlotAttribute;
 import top.theillusivec4.curios.api.SlotContext;
+import top.theillusivec4.curios.api.SlotResult;
 import top.theillusivec4.curios.api.event.CurioAttributeModifierEvent;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
@@ -83,24 +86,21 @@ public class CuriosImplMixinHooks {
   }
 
   public static Map<String, ISlotType> getItemStackSlots(ItemStack stack, boolean isClient) {
-    return taggedSlots(stack, CuriosApi.getSlots(isClient));
+    return filteredSlots(slotType -> {
+      SlotContext slotContext = new SlotContext(slotType.getIdentifier(), null, 0, false, true);
+      SlotResult slotResult = new SlotResult(slotContext, stack);
+      return CuriosApi.testCurioPredicates(slotType.getValidators(), slotResult);
+    }, CuriosApi.getSlots(isClient));
   }
 
   public static Map<String, ISlotType> getItemStackSlots(ItemStack stack,
                                                          LivingEntity livingEntity) {
-    return taggedSlots(stack, CuriosApi.getEntitySlots(livingEntity));
-  }
-
-  private static Map<String, ISlotType> taggedSlots(ItemStack stack, Map<String, ISlotType> map) {
-    ITagManager<Item> tags = ForgeRegistries.ITEMS.tags();
-
-    if (tags != null) {
-      Set<String> ids = stack.getTags()
-          .filter(tagKey -> tagKey.location().getNamespace().equals(CuriosApi.MODID))
-          .map(tagKey -> tagKey.location().getPath()).collect(Collectors.toSet());
-      return filteredSlots(slotType -> ids.contains(slotType.getIdentifier()), map);
-    }
-    return Map.of();
+    return filteredSlots(slotType -> {
+      SlotContext slotContext =
+          new SlotContext(slotType.getIdentifier(), livingEntity, 0, false, true);
+      SlotResult slotResult = new SlotResult(slotContext, stack);
+      return CuriosApi.testCurioPredicates(slotType.getValidators(), slotResult);
+    }, CuriosApi.getEntitySlots(livingEntity));
   }
 
   private static Map<String, ISlotType> filteredSlots(Predicate<ISlotType> filter,
@@ -254,5 +254,43 @@ public class CuriosImplMixinHooks {
   public static UUID getSlotUuid(SlotContext slotContext) {
     String key = slotContext.identifier() + slotContext.index();
     return UUIDS.computeIfAbsent(key, (k) -> UUID.nameUUIDFromBytes(k.getBytes()));
+  }
+
+
+  private static final Map<ResourceLocation, Predicate<SlotResult>> SLOT_RESULT_PREDICATES =
+      new HashMap<>();
+
+  public static void registerCurioPredicate(ResourceLocation resourceLocation,
+                                            Predicate<SlotResult> validator) {
+    SLOT_RESULT_PREDICATES.putIfAbsent(resourceLocation, validator);
+  }
+
+  public static Optional<Predicate<SlotResult>> getCurioPredicate(ResourceLocation resourceLocation) {
+    return Optional.ofNullable(SLOT_RESULT_PREDICATES.get(resourceLocation));
+  }
+
+  public static boolean testCurioPredicates(Set<ResourceLocation> predicates, SlotResult slotResult) {
+
+    for (ResourceLocation id : predicates) {
+
+      if (CuriosApi.getCurioPredicate(id).map(
+          slotResultPredicate -> slotResultPredicate.test(slotResult)).orElse(false)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static {
+    registerCurioPredicate(new ResourceLocation(CuriosApi.MODID, "all"), (slotResult) -> true);
+    registerCurioPredicate(new ResourceLocation(CuriosApi.MODID, "none"),
+        (slotResult) -> false);
+    registerCurioPredicate(new ResourceLocation(CuriosApi.MODID, "tag"), (slotResult) -> {
+      String id = slotResult.slotContext().identifier();
+      TagKey<Item> tag1 = ItemTags.create(new ResourceLocation(CuriosApi.MODID, id));
+      TagKey<Item> tag2 = ItemTags.create(new ResourceLocation(CuriosApi.MODID, "curio"));
+      ItemStack stack = slotResult.stack();
+      return stack.is(tag1) || stack.is(tag2);
+    });
   }
 }

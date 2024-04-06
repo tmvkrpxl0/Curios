@@ -1,10 +1,13 @@
 package top.theillusivec4.curios.common.data;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.JsonOps;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -24,6 +27,7 @@ public class SlotData implements ISlotData {
   private Boolean renderToggle;
   private Boolean replace;
   private List<ICondition> conditions;
+  private Set<ResourceLocation> validators;
 
   @Override
   public SlotData replace(boolean replace) {
@@ -90,6 +94,16 @@ public class SlotData implements ISlotData {
   }
 
   @Override
+  public ISlotData addValidator(ResourceLocation resourceLocation) {
+
+    if (this.validators == null) {
+      this.validators = new HashSet<>();
+    }
+    this.validators.add(resourceLocation);
+    return this;
+  }
+
+  @Override
   public JsonObject serialize(HolderLookup.Provider provider) {
     JsonObject jsonObject = new JsonObject();
 
@@ -133,6 +147,15 @@ public class SlotData implements ISlotData {
       this.conditions.forEach(condition -> jsonObject.add(ICondition.DEFAULT_FIELD,
           ICondition.CODEC.encode(condition, JsonOps.INSTANCE, JsonOps.INSTANCE.empty())
               .getOrThrow(false, JsonSyntaxException::new)));
+    }
+
+    if (this.validators != null) {
+      JsonArray arr = new JsonArray();
+
+      for (ResourceLocation slotResultPredicate : this.validators) {
+        arr.add(slotResultPredicate.toString());
+      }
+      jsonObject.add("validators", arr);
     }
     return jsonObject;
   }

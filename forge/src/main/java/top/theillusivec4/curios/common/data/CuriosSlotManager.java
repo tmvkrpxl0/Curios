@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
@@ -356,6 +357,8 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
     Boolean jsonNative =
         jsonObject.has("use_native_gui") ? GsonHelper.getAsBoolean(jsonObject, "use_native_gui") :
             null;
+    JsonArray jsonSlotResultPredicate = jsonObject.has("validators") ?
+        GsonHelper.getAsJsonArray(jsonObject, "validators") : null;
 
     if (jsonOrder != null) {
       builder.order(jsonOrder, replace);
@@ -383,6 +386,15 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
 
     if (jsonToggle != null) {
       builder.renderToggle(jsonToggle, replace);
+    }
+
+    if (jsonSlotResultPredicate != null) {
+      Set<ResourceLocation> result = new HashSet<>();
+
+      for (JsonElement jsonElement : jsonSlotResultPredicate) {
+        result.add(new ResourceLocation(jsonElement.getAsString()));
+      }
+      builder.validators(result);
     }
   }
 }
