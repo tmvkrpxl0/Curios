@@ -110,6 +110,26 @@ public interface ICuriosItemHandler {
   void setEquippedCurio(String identifier, int index, ItemStack stack);
 
   /**
+   * Checks if the given item is equipped in a curio slot.
+   *
+   * @param item The item to search for
+   * @return True if the item is equipped in a curio slot, false otherwise
+   */
+  default boolean isEquipped(Item item) {
+    return this.findFirstCurio(item).isPresent();
+  }
+
+  /**
+   * Checks if an item that matches the given filter is equipped in a curio slot.
+   *
+   * @param filter The filter to test against
+   * @return True if the item is equipped in a curio slot, false otherwise
+   */
+  default boolean isEquipped(Predicate<ItemStack> filter) {
+    return this.findFirstCurio(filter).isPresent();
+  }
+
+  /**
    * Gets the first matching item equipped in a curio slot.
    *
    * @param item The item to search for
