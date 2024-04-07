@@ -157,7 +157,10 @@ public class CuriosScreenV2 extends EffectRenderingInventoryScreen<CuriosContain
     this.panelWidth = this.menu.panelWidth;
     this.imageWidth = 176 + this.panelWidth;
     this.leftPos = (this.width - this.imageWidth) / 2;
-    this.recipeBookButton.setPosition(this.leftPos + 104 + this.panelWidth, this.height / 2 - 22);
+
+    if (this.recipeBookButton != null) {
+      this.recipeBookButton.setPosition(this.leftPos + 104 + this.panelWidth, this.height / 2 - 22);
+    }
 
     if (this.menu.hasCosmetics) {
       this.cosmeticButton =

@@ -46,7 +46,7 @@ public interface IIconHelper {
   void addIcon(String identifier, ResourceLocation resourceLocation);
 
   /**
-   * @deprecated See {@link CuriosApi#getSlot(String, Level)} and {@link ISlotType#getIcon()}.
+   * @deprecated See {@link ISlotType#getIcon()}.
    */
   @Deprecated(forRemoval = true, since = "1.20.1")
   @ApiStatus.ScheduledForRemoval(inVersion = "1.22")
