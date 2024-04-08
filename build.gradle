@@ -126,7 +126,7 @@ def publishDiscord() {
         changelog = changelog.replaceAll("\n","\\\\n")
 
         if (changelog.length() >= 1024) {
-            changelog = changelog.substring(0, changelog.length() - 100)
+            changelog = changelog.substring(0, 900)
             changelog = changelog + "...[(See more)](${changelog_link})"
         }
         println(changelog)
