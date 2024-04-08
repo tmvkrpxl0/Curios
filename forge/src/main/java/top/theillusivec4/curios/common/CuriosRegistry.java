@@ -19,6 +19,7 @@
 
 package top.theillusivec4.curios.common;
 
+import java.util.function.Supplier;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -31,6 +32,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
+import top.theillusivec4.curios.common.inventory.container.CuriosContainerV2;
 import top.theillusivec4.curios.server.command.CurioArgumentType;
 
 public class CuriosRegistry {
@@ -47,6 +49,9 @@ public class CuriosRegistry {
   public static final RegistryObject<MenuType<CuriosContainer>> CURIO_MENU =
       MENU_TYPES.register("curios_container",
           () -> IForgeMenuType.create(CuriosContainer::new));
+  public static final RegistryObject<MenuType<CuriosContainerV2>> CURIO_MENU_NEW =
+      MENU_TYPES.register("curios_container_v2",
+          () -> IForgeMenuType.create(CuriosContainerV2::new));
 
   public static void init() {
     IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();

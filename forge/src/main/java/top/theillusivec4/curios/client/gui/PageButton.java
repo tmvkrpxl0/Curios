@@ -7,8 +7,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 import top.theillusivec4.curios.CuriosConstants;
+import top.theillusivec4.curios.common.network.NetworkHandler;
 import top.theillusivec4.curios.common.network.client.CPacketPage;
 
 public class PageButton extends Button {
@@ -21,9 +22,9 @@ public class PageButton extends Button {
   public PageButton(CuriosScreenV2 parentGui, int xIn, int yIn, int widthIn, int heightIn,
                     Type type) {
     super(xIn, yIn, widthIn, heightIn, CommonComponents.EMPTY,
-        (button) -> PacketDistributor.SERVER.noArg()
-            .send(new CPacketPage(parentGui.getMenu().containerId, type == Type.NEXT)),
-        DEFAULT_NARRATION);
+        (button) -> NetworkHandler.INSTANCE.send(
+            new CPacketPage(parentGui.getMenu().containerId, type == Type.NEXT),
+            PacketDistributor.SERVER.noArg()), DEFAULT_NARRATION);
     this.parentGui = parentGui;
     this.type = type;
   }

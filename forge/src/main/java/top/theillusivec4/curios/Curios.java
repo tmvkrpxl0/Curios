@@ -62,6 +62,7 @@ import top.theillusivec4.curios.client.CuriosClientConfig;
 import top.theillusivec4.curios.client.IconHelper;
 import top.theillusivec4.curios.client.KeyRegistry;
 import top.theillusivec4.curios.client.gui.CuriosScreen;
+import top.theillusivec4.curios.client.gui.CuriosScreenV2;
 import top.theillusivec4.curios.client.gui.GuiEventHandler;
 import top.theillusivec4.curios.client.render.CuriosLayer;
 import top.theillusivec4.curios.common.CuriosConfig;
@@ -173,6 +174,7 @@ public class Curios {
       MinecraftForge.EVENT_BUS.register(new ClientEventHandler());
       MinecraftForge.EVENT_BUS.register(new GuiEventHandler());
       MenuScreens.register(CuriosRegistry.CURIO_MENU.get(), CuriosScreen::new);
+      MenuScreens.register(CuriosRegistry.CURIO_MENU_NEW.get(), CuriosScreenV2::new);
     }
 
     @SubscribeEvent

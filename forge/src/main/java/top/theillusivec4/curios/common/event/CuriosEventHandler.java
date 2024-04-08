@@ -84,6 +84,7 @@ import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.event.CurioDropsEvent;
 import top.theillusivec4.curios.api.event.CurioUnequipEvent;
 import top.theillusivec4.curios.api.event.DropRulesEvent;
+import top.theillusivec4.curios.api.type.ICuriosMenu;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurio;
 import top.theillusivec4.curios.api.type.capability.ICurio.DropRule;
@@ -96,7 +97,6 @@ import top.theillusivec4.curios.common.capability.CurioInventoryCapability;
 import top.theillusivec4.curios.common.capability.ItemizedCurioCapability;
 import top.theillusivec4.curios.common.data.CuriosEntityManager;
 import top.theillusivec4.curios.common.data.CuriosSlotManager;
-import top.theillusivec4.curios.common.inventory.container.CuriosContainer;
 import top.theillusivec4.curios.common.network.NetworkHandler;
 import top.theillusivec4.curios.common.network.server.SPacketSetIcons;
 import top.theillusivec4.curios.common.network.server.sync.SPacketSyncCurios;
@@ -216,7 +216,7 @@ public class CuriosEventHandler {
           NetworkHandler.INSTANCE.send(new SPacketSyncCurios(player.getId(), handler.getCurios()),
               PacketDistributor.TRACKING_ENTITY_AND_SELF.with(player));
 
-          if (player.containerMenu instanceof CuriosContainer curiosContainer) {
+          if (player.containerMenu instanceof ICuriosMenu curiosContainer) {
             curiosContainer.resetSlots();
           }
         });
@@ -230,9 +230,14 @@ public class CuriosEventHandler {
       ServerPlayer mp = evt.getPlayer();
       NetworkHandler.INSTANCE.send(new SPacketSyncData(CuriosSlotManager.getSyncPacket(),
           CuriosEntityManager.getSyncPacket()), PacketDistributor.PLAYER.with(mp));
-      CuriosApi.getCuriosInventory(mp).ifPresent(handler -> NetworkHandler.INSTANCE.send(
-          new SPacketSyncCurios(mp.getId(), handler.getCurios()),
-          PacketDistributor.PLAYER.with(mp)));
+      CuriosApi.getCuriosInventory(mp).ifPresent(handler -> {
+        NetworkHandler.INSTANCE.send(new SPacketSyncCurios(mp.getId(), handler.getCurios()),
+            PacketDistributor.PLAYER.with(mp));
+
+        if (mp.containerMenu instanceof ICuriosMenu curiosContainer) {
+          curiosContainer.resetSlots();
+        }
+      });
       Collection<ISlotType> slotTypes = CuriosApi.getPlayerSlots(mp).values();
       Map<String, ResourceLocation> icons = new HashMap<>();
       slotTypes.forEach(type -> icons.put(type.getIdentifier(), type.getIcon()));

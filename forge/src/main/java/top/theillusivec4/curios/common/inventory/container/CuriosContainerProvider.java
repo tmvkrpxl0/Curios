@@ -26,6 +26,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.network.chat.Component;
+import top.theillusivec4.curios.common.CuriosConfig;
 
 public class CuriosContainerProvider implements MenuProvider {
 
@@ -39,6 +40,11 @@ public class CuriosContainerProvider implements MenuProvider {
   @Override
   public AbstractContainerMenu createMenu(int i, @Nonnull Inventory playerInventory,
                               @Nonnull Player playerEntity) {
-    return new CuriosContainer(i, playerInventory);
+
+    if (CuriosConfig.SERVER.enableExperimentalMenu.get()) {
+      return new CuriosContainerV2(i, playerInventory);
+    } else {
+      return new CuriosContainer(i, playerInventory);
+    }
   }
 }
