@@ -248,16 +248,23 @@ def publishDiscord() {
         changelog = changelog.replaceAll("\r\n","\\\\r\\\\n").replaceAll("\"","\\\\\"")
 
         if (changelog.length() >= 1024) {
-            changelog = changelog.substring(0, changelog.length() - 100)
+            changelog = changelog.substring(0, 900)
             changelog = changelog + "...[(See more)](https://github.com/TheIllusiveC4/Curios/blob/1.20.x/CHANGELOG_LATEST.md)"
         }
         println(changelog)
+        int color = 65392
+
+        if (release_type == "beta") {
+            color = 16763904
+        } else if (release_type == "alpha") {
+            color = 16724273
+        }
         final String message = """
             {
               "embeds": [
                 {
                   "title": "${mod_name} ${version}",
-                  "color": 65392,
+                  "color": ${color},
                   "fields": [
                     {
                       "name": "Minecraft Versions",
