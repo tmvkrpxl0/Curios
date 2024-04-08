@@ -48,7 +48,10 @@ public class CuriosConfig {
     public ForgeConfigSpec.ConfigValue<List<? extends String>> slots;
 
     public Common(ForgeConfigSpec.Builder builder) {
-      slots = builder.comment("List of slots to create or modify.")
+      slots = builder.comment("""
+              List of slots to create or modify.
+              See documentation for syntax: https://docs.illusivesoulworks.com/curios/configuration#slot-configuration
+              """)
           .translation(CONFIG_PREFIX + "slots")
           .defineList("slots", List.of(), s -> s instanceof String);
 
