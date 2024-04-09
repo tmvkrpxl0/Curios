@@ -414,7 +414,7 @@ public final class CuriosApi {
    */
   @Nonnull
   public static ResourceLocation getSlotIcon(String id) {
-    return CuriosApi.getSlot(id, false).map(ISlotType::getIcon)
+    return CuriosApi.getSlot(id, true).map(ISlotType::getIcon)
         .orElse(new ResourceLocation(CuriosApi.MODID, "slot/empty_curio_slot"));
   }
 

@@ -377,12 +377,10 @@ public class CuriosSlotManager extends SimpleJsonResourceReloadListener {
     }
 
     if (jsonSlotResultPredicate != null) {
-      Set<ResourceLocation> result = new HashSet<>();
 
       for (JsonElement jsonElement : jsonSlotResultPredicate) {
-        result.add(new ResourceLocation(jsonElement.getAsString()));
+        builder.validator(new ResourceLocation(jsonElement.getAsString()));
       }
-      builder.validators(result);
     }
   }
 }
