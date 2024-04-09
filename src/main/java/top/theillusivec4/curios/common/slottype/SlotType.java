@@ -55,14 +55,12 @@ public final class SlotType implements ISlotType {
     builder.renderToggle(tag.getBoolean("ToggleRender"));
     builder.dropRule(ICurio.DropRule.values()[tag.getInt("DropRule")]);
     ListTag list = tag.getList("Validators", Tag.TAG_STRING);
-    Set<ResourceLocation> preds = new HashSet<>();
     for (Tag tag1 : list) {
 
       if (tag1 instanceof StringTag stringTag) {
-        preds.add(new ResourceLocation(stringTag.getAsString()));
+        builder.validator(new ResourceLocation(stringTag.getAsString()));
       }
     }
-    builder.validators(preds);
     return builder.build();
   }
 
@@ -226,7 +224,7 @@ public final class SlotType implements ISlotType {
       }
 
       if (builder.validators != null) {
-        this.validators(builder.validators);
+        this.validators = Set.copyOf(builder.validators);
       }
     }
 
@@ -318,8 +316,12 @@ public final class SlotType implements ISlotType {
       return this;
     }
 
-    public Builder validators(Set<ResourceLocation> slotResultPredicates) {
-      this.validators = slotResultPredicates;
+    public Builder validator(ResourceLocation slotResultPredicate) {
+
+      if (this.validators == null) {
+        this.validators = new HashSet<>();
+      }
+      this.validators.add(slotResultPredicate);
       return this;
     }
 
