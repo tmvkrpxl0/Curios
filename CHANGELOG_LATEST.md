@@ -3,7 +3,7 @@ Prior to version 5.2.0, this project used [Forge Recommended Versioning](https:/
 
 This is a copy of the changelog for the most recent version. For the full version history, go [here](https://github.com/TheIllusiveC4/Curios/blob/1.20.x/docs/CHANGELOG.md).
 
-## [5.8.0-beta.2+1.20.1] - 2024.04.08
-### Fixed
-- Fixed potential backwards compatibility issue
-- Fixed validators replacing instead of merging when defined
+## [5.8.0+1.20.1] - 2024.04.15
+### Changed
+- Attempting to quick-move stacks into Curios slots in the new experimental GUI will now include pages other than the
+current one
