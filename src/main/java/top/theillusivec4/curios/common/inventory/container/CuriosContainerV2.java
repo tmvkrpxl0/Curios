@@ -42,6 +42,7 @@ import top.theillusivec4.curios.common.CuriosRegistry;
 import top.theillusivec4.curios.common.inventory.CurioSlot;
 import top.theillusivec4.curios.common.network.NetworkHandler;
 import top.theillusivec4.curios.common.network.server.SPacketPage;
+import top.theillusivec4.curios.common.network.server.SPacketQuickMove;
 
 public class CuriosContainerV2 extends CuriosContainer {
 
@@ -62,6 +63,9 @@ public class CuriosContainerV2 extends CuriosContainer {
   public int currentPage;
   public int totalPages;
   public List<Integer> grid;
+  private List<ProxySlot> proxySlots;
+  private int moveToPage = -1;
+  private int moveFromIndex = -1;
   public boolean hasCosmetics;
   public boolean isViewingCosmetics;
   public int panelWidth;
@@ -179,6 +183,9 @@ public class CuriosContainerV2 extends CuriosContainer {
       int currentRow = 1;
       int slots = 0;
       this.grid = new ArrayList<>();
+      this.proxySlots = new ArrayList<>();
+      int currentPage = 0;
+      int endingIndex = startingIndex + maxSlotsPerPage;
 
       for (String identifier : curioMap.keySet()) {
         ICurioStacksHandler stacksHandler = curioMap.get(identifier);
@@ -196,9 +203,9 @@ public class CuriosContainerV2 extends CuriosContainer {
 
         if (stacksHandler.isVisible()) {
 
-          for (int i = 0; i < stackHandler.getSlots() && slots < maxSlotsPerPage; i++) {
+          for (int i = 0; i < stackHandler.getSlots(); i++) {
 
-            if (index >= startingIndex) {
+            if (index >= startingIndex && index < endingIndex) {
 
               if (isCosmetic) {
                 this.addSlot(
@@ -213,7 +220,6 @@ public class CuriosContainerV2 extends CuriosContainer {
                         yOffset + (currentRow - 1) * 18, stacksHandler.getRenders(),
                         stacksHandler.canToggleRendering(), false, false));
               }
-              slots++;
 
               if (this.grid.size() < currentColumn) {
                 this.grid.add(1);
@@ -227,6 +233,27 @@ public class CuriosContainerV2 extends CuriosContainer {
               } else {
                 currentColumn++;
               }
+            } else {
+
+              if (isCosmetic) {
+                this.proxySlots.add(new ProxySlot(currentPage,
+                    new CurioSlot(this.player, stackHandler, i, identifier,
+                        (currentColumn - 1) * 18 + 7, yOffset + (currentRow - 1) * 18,
+                        stacksHandler.getRenders(), stacksHandler.canToggleRendering(), true,
+                        true)));
+              } else {
+                this.proxySlots.add(new ProxySlot(currentPage,
+                    new CurioSlot(this.player, stackHandler, i, identifier,
+                        (currentColumn - 1) * 18 + 7, yOffset + (currentRow - 1) * 18,
+                        stacksHandler.getRenders(), stacksHandler.canToggleRendering(), false,
+                        false)));
+              }
+            }
+            slots++;
+
+            if (slots >= maxSlotsPerPage) {
+              slots = 0;
+              currentPage++;
             }
             index++;
           }
@@ -340,7 +367,14 @@ public class CuriosContainerV2 extends CuriosContainer {
           !CuriosApi.getItemStackSlots(itemstack, playerIn.level()).isEmpty()) {
 
         if (!this.moveItemStackTo(itemstack1, 46, this.slots.size(), false)) {
-          return ItemStack.EMPTY;
+          int page = this.findAvailableSlot(itemstack1);
+
+          if (page != -1) {
+            this.moveToPage = page;
+            this.moveFromIndex = index;
+          } else {
+            return ItemStack.EMPTY;
+          }
         }
       } else if (entityequipmentslot == EquipmentSlot.OFFHAND && !(this.slots.get(45))
           .hasItem()) {
@@ -377,6 +411,41 @@ public class CuriosContainerV2 extends CuriosContainer {
     }
 
     return itemstack;
+  }
+
+  protected int findAvailableSlot(ItemStack stack) {
+    int result = -1;
+
+    if (stack.isStackable()) {
+
+      for (ProxySlot proxySlot : this.proxySlots) {
+        Slot slot = proxySlot.slot();
+        ItemStack itemstack = slot.getItem();
+
+        if (!itemstack.isEmpty() && ItemStack.isSameItemSameTags(stack, itemstack)) {
+          int j = itemstack.getCount() + stack.getCount();
+          int maxSize = Math.min(slot.getMaxStackSize(), stack.getMaxStackSize());
+
+          if (j <= maxSize || itemstack.getCount() < maxSize) {
+            result = proxySlot.page();
+            break;
+          }
+        }
+      }
+    }
+
+    if (!stack.isEmpty() && result == -1) {
+
+      for (ProxySlot proxySlot : this.proxySlots) {
+        Slot slot1 = proxySlot.slot();
+        ItemStack itemstack1 = slot1.getItem();
+        if (itemstack1.isEmpty() && slot1.mayPlace(stack)) {
+          result = proxySlot.page();
+          break;
+        }
+      }
+    }
+    return result;
   }
 
   @Nonnull
@@ -432,5 +501,24 @@ public class CuriosContainerV2 extends CuriosContainer {
 
   public void prevPage() {
     this.setPage(Math.max(this.currentPage - 1, 0));
+  }
+
+  public void checkQuickMove() {
+
+    if (this.moveToPage != -1) {
+      this.setPage(this.moveToPage);
+      this.quickMoveStack(this.player, this.moveFromIndex);
+      this.moveToPage = -1;
+
+      if (!this.isLocalWorld) {
+        NetworkHandler.INSTANCE.send(
+            PacketDistributor.PLAYER.with(() -> (ServerPlayer) this.player),
+            new SPacketQuickMove(this.containerId, this.moveFromIndex));
+      }
+    }
+  }
+
+  private record ProxySlot(int page, Slot slot) {
+
   }
 }
