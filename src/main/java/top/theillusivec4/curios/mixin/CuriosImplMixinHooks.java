@@ -21,8 +21,10 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -110,7 +112,15 @@ public class CuriosImplMixinHooks {
 
   public static boolean isStackValid(SlotContext slotContext, ItemStack stack) {
     String id = slotContext.identifier();
-    Set<String> slots = getItemStackSlots(stack, slotContext.entity()).keySet();
+    LivingEntity entity = slotContext.entity();
+    Map<String, ISlotType> map;
+
+    if (entity != null) {
+      map = getItemStackSlots(stack, entity);
+    } else {
+      map = getItemStackSlots(stack, FMLLoader.getDist() == Dist.CLIENT);
+    }
+    Set<String> slots = map.keySet();
     return (!slots.isEmpty() && id.equals("curio")) || slots.contains(id) ||
         slots.contains("curio");
   }
@@ -242,11 +252,13 @@ public class CuriosImplMixinHooks {
     SLOT_RESULT_PREDICATES.putIfAbsent(resourceLocation, validator);
   }
 
-  public static Optional<Predicate<SlotResult>> getCurioPredicate(ResourceLocation resourceLocation) {
+  public static Optional<Predicate<SlotResult>> getCurioPredicate(
+      ResourceLocation resourceLocation) {
     return Optional.ofNullable(SLOT_RESULT_PREDICATES.get(resourceLocation));
   }
 
-  public static boolean testCurioPredicates(Set<ResourceLocation> predicates, SlotResult slotResult) {
+  public static boolean testCurioPredicates(Set<ResourceLocation> predicates,
+                                            SlotResult slotResult) {
 
     for (ResourceLocation id : predicates) {
 

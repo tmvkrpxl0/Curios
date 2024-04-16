@@ -153,7 +153,8 @@ public final class CuriosApi {
    * @return The slot types provided to the entity
    */
   public static Map<String, ISlotType> getEntitySlots(LivingEntity livingEntity) {
-    return CuriosApi.getEntitySlots(livingEntity.getType(), livingEntity.level());
+    return livingEntity != null ?
+        CuriosApi.getEntitySlots(livingEntity.getType(), livingEntity.level()) : Map.of();
   }
 
   /**
